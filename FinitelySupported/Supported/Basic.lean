@@ -33,6 +33,10 @@ instance [Supported 𝔸 X] (eq : X ≃ Y) : @Supported 𝔸 Y (.lift 𝔸 eq) :
   have := hA.eq π hπ
   simp only [PermAction.perm_lift, this, Equiv.apply_symm_apply]
 
+instance {X} : @Supported 𝔸 X default := by
+  apply @Supported.mk 𝔸 X default
+  simp only [IsSupp.default, exists_const, implies_true]
+
 lemma isHom_of_lift {Y} (eq : X ≃ Y) : IsHom[lift 𝔸 eq, _] eq.symm := by
   use ∅
   simp only [
@@ -167,6 +171,15 @@ lemma isHom_perm (π : Perm 𝔸) : IsHom 𝔸 ((perm π ·) : X → X) := by
         have := π.injective hbc'
         contradiction
   simp only [Function.perm_def, Perm.inv_swap, perm_mul, Perm.mul_assoc, this, Perm.swap_swap_l]
+
+@[simp]
+lemma supp_default {X} (x : X) : @supp X 𝔸 default _ x = ∅ := by
+  ext a
+  simp only [Finset.notMem_empty, iff_false]
+  intro ha
+  simp only [mem_supp, IsSupp.default, forall_const] at ha
+  specialize ha ∅
+  contradiction
 
 @[fun_prop]
 lemma FS.isHom_mk

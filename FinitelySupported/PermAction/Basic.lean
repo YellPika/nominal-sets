@@ -152,6 +152,11 @@ lemma inter
 
   by_cases a ∈ A <;> by_cases b ∈ B <;> grind
 
+@[simp]
+lemma default {X} {A : Finset 𝔸} (x : X) : @IsSupp 𝔸 X default A x := by
+  apply @IsSupp.mk 𝔸 X Inhabited.default
+  simp only [default_perm, implies_true]
+
 end IsSupp
 
 namespace PermAction
