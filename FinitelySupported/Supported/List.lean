@@ -34,10 +34,10 @@ lemma supp_nil : supp 𝔸 ([] : List X) = ∅ := by
 lemma supp_cons
     [DecidableEq 𝔸] (x : X) (xs : List X)
     : supp 𝔸 (x :: xs) = supp 𝔸 x ∪ supp 𝔸 xs := by
-  ext a
   have : supp 𝔸 (x :: xs) = supp 𝔸 (x, xs) := by
     ext a
     simp only [mem_supp, List.isSupp_cons, and_imp, Prod.isSupp_iff]
+  ext a
   simp only [this, Prod.supp_eq, Finset.mem_union, mem_supp]
 
 end Supported.List
