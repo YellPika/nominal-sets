@@ -1,0 +1,13 @@
+import FinitelySupported.Perm.Basic
+import FinitelySupported.Perm.Defs
+import FinitelySupported.PermAction.Basic
+import FinitelySupported.PermAction.Defs
+import FinitelySupported.PermAction.Function
+import FinitelySupported.PermAction.Perm
+import FinitelySupported.PermAction.Prod
+import FinitelySupported.PermAction.Sum
+import FinitelySupported.Supported.Basic
+import FinitelySupported.Supported.Defs
+import FinitelySupported.Supported.Perm
+import FinitelySupported.Supported.Prod
+import FinitelySupported.Supported.Sum
