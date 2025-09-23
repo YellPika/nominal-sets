@@ -1,13 +1,14 @@
 # finitely-supported
 
-## GitHub configuration
+This is a formalization of finitely-supported sets. Finitely-supported sets are similar to nominal sets, but morphisms are finitely-supported functions instead of equivariant functions.
 
-To set up your new GitHub repository, follow these steps:
+## Usage
 
-* Under your repository name, click **Settings**.
-* In the **Actions** section of the sidebar, click "General".
-* Check the box **Allow GitHub Actions to create and approve pull requests**.
-* Click the **Pages** section of the settings sidebar.
-* In the **Source** dropdown menu, select "GitHub Actions".
+To add this library as a dependency, add the following lines to your `lakefile.toml` and run `lake update`:
 
-After following the steps above, you can remove this section from the README file.
+```toml
+[[require]]
+name = "finitely-supported"
+git = "https://github.com/YellPika/finitely-supported"
+rev = "main"
+```
