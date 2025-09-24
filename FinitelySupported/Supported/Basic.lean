@@ -126,9 +126,7 @@ lemma isSupp_supp
 @[simp]
 lemma isHom_const [Supported 𝔸 Y] (y : Y) : IsHom 𝔸 (Function.const X y) := by
   obtain ⟨A, hA⟩ := has_supp 𝔸 y
-  use A
-  intro π x hπ
-  apply hA.eq π hπ
+  apply PermAction.isHom_const A hA
 
 @[fun_prop, simp]
 lemma isHom_const' [Supported 𝔸 Y] (y : Y) : IsHom 𝔸 (fun _ : X ↦ y) :=

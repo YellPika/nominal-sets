@@ -195,4 +195,12 @@ lemma isHom_comp'
     : IsHom 𝔸 (fun x ↦ f (g x)) :=
   isHom_comp hf hg
 
+lemma isHom_const
+    {y : Y} (A : Finset 𝔸) (hy : IsSupp A y)
+    : IsHom 𝔸 (fun _ : X ↦ y) := by
+  use A
+  rcases hy with ⟨hf⟩
+  intro π x
+  apply hf
+
 end PermAction
