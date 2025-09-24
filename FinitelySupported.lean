@@ -1,6 +1,7 @@
 import FinitelySupported.Perm.Basic
 import FinitelySupported.Perm.Defs
 import FinitelySupported.PermAction.Basic
+import FinitelySupported.PermAction.Bool
 import FinitelySupported.PermAction.Defs
 import FinitelySupported.PermAction.Empty
 import FinitelySupported.PermAction.Function
