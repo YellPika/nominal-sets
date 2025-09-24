@@ -11,7 +11,7 @@ namespace Supported
 
 open PermAction
 
-variable {𝔸 X Y : Type*}
+variable {𝔸 X Y Z : Type*}
 
 /-- Every finitely-supported element has a minimal support. -/
 noncomputable def supp (𝔸) [PermAction 𝔸 X] [Supported 𝔸 X] (x : X) : Finset 𝔸 :=
@@ -36,7 +36,7 @@ structure FS (𝔸) (X : Type*) [PermAction 𝔸 X] where
 namespace FS
 
 @[simps]
-instance {𝔸 X : Type*} [PermAction 𝔸 X] : PermAction 𝔸 (FS 𝔸 X) where
+instance [PermAction 𝔸 X] : PermAction 𝔸 (FS 𝔸 X) where
   perm π x := {
     val := perm π x.val,
     property := by
@@ -56,8 +56,11 @@ instance {𝔸 X : Type*} [PermAction 𝔸 X] : PermAction 𝔸 (FS 𝔸 X) wher
   perm_one := by simp only [perm_one, implies_true]
   perm_mul := by simp only [perm_mul, implies_true]
 
-instance {𝔸 X Y} [PermAction 𝔸 X] [PermAction 𝔸 Y] : CoeFun (FS 𝔸 (X → Y)) (fun _ ↦ X → Y) where
+instance [PermAction 𝔸 X] [PermAction 𝔸 Y] : CoeFun (FS 𝔸 (X → Y)) (fun _ ↦ X → Y) where
   coe := val
+
+instance [PermAction 𝔸 X] [CoeFun X (fun _ ↦ Y)] : CoeFun (FS 𝔸 X) (fun _ ↦ Y) where
+  coe f := f.val
 
 end FS
 
