@@ -21,6 +21,28 @@ instance : Supported 𝔸 (FS 𝔸 X) where
     ext
     apply hA.eq π hπ
 
+@[simp, fun_prop]
+lemma isHom_val : IsHom 𝔸 (val (𝔸 := 𝔸) (X := X)) := by
+  use ∅
+  simp only [Finset.notMem_empty, IsEmpty.forall_iff, implies_true, perm_val]
+
+@[simp]
+lemma isHom_iff (f : X → FS 𝔸 Y) : IsHom 𝔸 f ↔ IsHom 𝔸 (fun x ↦ (f x).val) := by
+  apply Iff.intro
+  · rintro ⟨A, hA⟩
+    use A
+    intro π x hπ
+    simp only [←hA π x hπ, perm_val]
+  · rintro ⟨A, hA⟩
+    use A
+    intro π x hπ
+    ext
+    simp only [perm_val, hA π x hπ]
+
+@[fun_prop]
+lemma isHom_to {f : X → FS 𝔸 Y} : IsHom 𝔸 f → IsHom 𝔸 (fun x ↦ (f x).val) := by
+  simp only [isHom_iff, isHom_val, isHom_id', isHom_comp', imp_self]
+
 end FS
 
 instance [Supported 𝔸 X] (eq : X ≃ Y) : @Supported 𝔸 Y (.lift 𝔸 eq) := by
