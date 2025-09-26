@@ -6,7 +6,7 @@ variable {𝔸 X Y : Type*} [PermAction 𝔸 X] [PermAction 𝔸 Y]
 
 instance : PermAction 𝔸 Prop := default
 
-@[simp]
+@[simp, fun_prop]
 lemma isHom_ite
     {p : X → Prop} (hp : IsHom 𝔸 p) [DecidablePred p]
     {f : X → Y} (hf : IsHom 𝔸 f)
