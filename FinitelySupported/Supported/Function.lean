@@ -88,4 +88,13 @@ lemma isHom_iff (f : X → FS 𝔸 (Y → Z)) : IsHom 𝔸 f ↔ IsHom 𝔸 (fun
     apply FS.isHom_mk
     fun_prop
 
+@[fun_prop]
+lemma isHom_apply [Supported 𝔸 X] (x : X) : IsHom 𝔸 fun f : X → Y ↦ f x := by
+  obtain ⟨A, ⟨hA⟩⟩ := has_supp 𝔸 x
+  use A
+  intro π f hπ
+  specialize hA π hπ
+  nth_rw 2 [←hA]
+  simp only [Function.perm_def, perm_mul, inv_mul_cancel, perm_one]
+
 end Supported.Function
