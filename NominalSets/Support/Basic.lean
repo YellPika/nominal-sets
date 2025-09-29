@@ -348,6 +348,14 @@ instance [Nominal 𝔸 X] (eq : X ≃ Y) : Nominal[lift 𝔸 eq] := by
   intro y
   simp only [isSupported_lift, Nominal.supported]
 
+instance : Nominal 𝔸 𝔸 where
+  supported a := by
+    use {a}
+    constructor
+    intro π hπ
+    simp only [Finset.mem_singleton, forall_eq] at hπ
+    simp only [perm_def, hπ]
+
 end PermAction
 
 namespace DiscretePermAction
