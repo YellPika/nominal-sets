@@ -24,12 +24,12 @@ instance : PermAction 𝔸 (X × Y) where
 lemma perm_mk (π : Perm 𝔸) (x : X) (y : Y) : perm π (x, y) = (perm π x, perm π y) := by rfl
 
 @[simp]
-lemma perm_fst (π : Perm 𝔸) (x : X × Y) : perm π (Prod.fst x) = Prod.fst (perm π x) := by
+lemma perm_fst (π : Perm 𝔸) (x : X × Y) : Prod.fst (perm π x) = perm π (Prod.fst x) := by
   cases x
   simp only [perm_mk]
 
 @[simp]
-lemma perm_snd (π : Perm 𝔸) (x : X × Y) : perm π (Prod.snd x) = Prod.snd (perm π x) := by
+lemma perm_snd (π : Perm 𝔸) (x : X × Y) : Prod.snd (perm π x) = perm π (Prod.snd x) := by
   cases x
   simp only [perm_mk]
 
