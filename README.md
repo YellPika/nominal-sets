@@ -1,6 +1,6 @@
-# finitely-supported
+# nominal-sets
 
-This is a formalization of finitely-supported sets. Finitely-supported sets are similar to nominal sets, but morphisms are finitely-supported functions instead of equivariant functions.
+This is a formalization of nominal sets.
 
 ## Usage
 
@@ -8,7 +8,7 @@ To add this library as a dependency, add the following lines to your `lakefile.t
 
 ```toml
 [[require]]
-name = "finitely-supported"
-git = "https://github.com/YellPika/finitely-supported"
+name = "nominal-sets"
+git = "https://github.com/YellPika/nominal-sets"
 rev = "main"
 ```

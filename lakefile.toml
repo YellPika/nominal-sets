@@ -1,7 +1,7 @@
-name = "finitely-supported"
+name = "nominal-sets"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["FinitelySupported"]
+defaultTargets = ["NominalSets"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
@@ -22,4 +22,4 @@ git = "https://github.com/YellPika/lean-rose-tree"
 rev = "main"
 
 [[lean_lib]]
-name = "FinitelySupported"
+name = "NominalSets"
