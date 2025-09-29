@@ -22,6 +22,17 @@ lemma inj (π : Perm 𝔸) (a b : 𝔸) : π a = π b ↔ a = b := by
   · apply injective
   · grind
 
+@[simp]
+lemma invFun_injective (π : Perm 𝔸) : Function.Injective π.invFun := by
+  apply Function.LeftInverse.injective (g := π.toFun)
+  simp only [Function.LeftInverse, right_inverse, implies_true]
+
+@[simp]
+lemma invFun_inj (π : Perm 𝔸) (a b : 𝔸) : π.invFun a = π.invFun b ↔ a = b := by
+  apply Iff.intro
+  · apply invFun_injective
+  · grind
+
 @[ext]
 lemma ext {π₁ π₂ : Perm 𝔸} (h : ∀ a, π₁ a = π₂ a) : π₁ = π₂ := by
   rcases π₁ with ⟨π₁₁, π₁₂, hπ₁₁, hπ₁₂, π₁₃⟩

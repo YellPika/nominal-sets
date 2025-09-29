@@ -94,4 +94,24 @@ instance [Nominal 𝔸 X] : Nominal 𝔸 (Finset X) where
         nth_rw 1 [← hπ a x hx ha]
         simp only [Perm.inv_toFun, Perm.left_inverse]
 
+@[simp]
+lemma perm_supp
+    {X} [PermAction 𝔸 X] [DecidableEq 𝔸] [Nominal 𝔸 X]
+    (π : Perm 𝔸) (x : X)
+    : perm π (supp 𝔸 x) = supp 𝔸 (perm π x):= by
+  ext a
+  simp only [mem_perm, PermAction.perm_def, Perm.inv_toFun, mem_supp, isSupportOf_perm]
+  apply Iff.intro
+  · intro h A hA
+    specialize h (A.image π.invFun) hA
+    simp only [Finset.mem_image, Perm.invFun_inj, exists_eq_right] at h
+    exact h
+  · intro h A hA
+    specialize h (A.image π.toFun)
+    simp +unfoldPartialApp only [
+      Finset.image_image, Function.comp, Perm.left_inverse,
+      Finset.image_id', hA, Finset.mem_image, forall_const] at h
+    rcases h with ⟨b, h₁, rfl⟩
+    simp only [Perm.left_inverse, h₁]
+
 end NominalSets.Finset
