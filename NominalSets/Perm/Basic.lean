@@ -1,5 +1,7 @@
 import NominalSets.Perm.Defs
 import Mathlib.Algebra.Group.Defs
+import Mathlib.Logic.Equiv.List
+import Mathlib.Data.Countable.Basic
 
 /-!
 # Permutations
@@ -171,5 +173,14 @@ lemma exists_seq [DecidableEq 𝔸] (π : Perm 𝔸) : ∃xs, π = seq xs := by
       · rcases ih with ⟨xs, hxs⟩
         use (a, π a) :: xs
         simp only [seq, ← hxs, mul_assoc, swap_swap, one_mul]
+
+instance [Countable 𝔸] : Countable (Perm 𝔸) := by
+  classical
+  have lem (π : Perm 𝔸) := exists_seq π
+  choose toList prop using lem
+  apply Function.Injective.countable (f := toList)
+  intro π₁ π₂ hπ
+  have := congr_arg seq hπ
+  simpa only [← prop] using this
 
 end NominalSets.Perm
