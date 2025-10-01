@@ -45,6 +45,26 @@ lemma ext {π₁ π₂ : Perm 𝔸} (h : ∀ a, π₁ a = π₂ a) : π₁ = π�
     apply injective ⟨π₁₁, π₁₂, hπ₁₁, hπ₁₂, π₁₃⟩
     simp only [hπ₁₁, h, hπ₂₁]
 
+@[simp]
+lemma eta {π₁ π₂ : Perm 𝔸} : π₁.toFun = π₂.toFun ↔ π₁ = π₂ := by
+  apply Iff.intro
+  · intro h
+    ext
+    rw [h]
+  · grind
+
+@[simp]
+lemma eta_inv {π₁ π₂ : Perm 𝔸} : π₁.invFun = π₂.invFun ↔ π₁ = π₂ := by
+  apply Iff.intro
+  · intro h
+    simp only [funext_iff] at h
+    replace h a := congr_arg π₁ (h a)
+    simp only [right_inverse] at h
+    ext a
+    rw [h (π₂ a)]
+    simp only [left_inverse]
+  · grind
+
 instance : Group (Perm 𝔸) where
   one_mul _ := rfl
   mul_assoc _ _ _ := rfl
