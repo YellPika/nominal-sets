@@ -369,6 +369,45 @@ lemma mem_supp
     : a ∈ supp 𝔸 x ↔ (∀ A : Finset 𝔸, IsSupportOf A x → a ∈ A) := by
   simp only [supp, Set.Finite.mem_toFinset, Set.mem_iInter, Finset.mem_coe]
 
+lemma mem_supp'
+    [DecidableEq 𝔸] [Nominal 𝔸 X] (a : 𝔸) (x : X)
+    : a ∈ supp 𝔸 x ↔ {b | perm (.swap a b) x ≠ x}.Infinite := by
+  apply Iff.intro
+  · simp only [mem_supp, ne_eq]
+    intro h
+    by_contra hx
+    simp only [Set.not_infinite] at hx
+    specialize h hx.toFinset
+    simp only [
+      Set.Finite.mem_toFinset, Set.mem_setOf_eq, Perm.swap_eq,
+      perm_one, not_true_eq_false, imp_false] at h
+    simp only [
+      isSupportOf_swap, Set.Finite.mem_toFinset,
+      Set.mem_setOf_eq, not_not, not_forall] at h
+    rcases h with ⟨b, c, hb, hc, h⟩
+    apply h
+    wlog hbc : b ≠ c
+    · simp only [ne_eq, Decidable.not_not] at hbc
+      subst hbc
+      simp only [Perm.swap_eq, perm_one]
+    wlog hca : c ≠ a
+    · simp only [ne_eq, Decidable.not_not] at hca
+      subst hca
+      rw [Perm.swap_comm, hb]
+    have : Perm.swap b c = Perm.swap a b * Perm.swap a c * Perm.swap a b := by
+      ext d
+      simp only [Perm.swap_toFun, Perm.mul_toFun]
+      grind
+    simp [this, ←PermAction.perm_mul, hc, hb]
+  · intro h
+    simp only [mem_supp]
+    intro A ⟨hA⟩
+    by_contra ha
+    obtain ⟨b, hb⟩ := h.exists_notMem_finset (A ∪ {a})
+    simp only [ne_eq, Set.mem_setOf_eq, Finset.union_singleton, Finset.mem_insert, not_or] at hb
+    specialize hA (.swap a b) (by simp only [Perm.swap_toFun]; grind)
+    grind
+
 lemma supp_min [Nominal 𝔸 X] {A : Finset 𝔸} {x : X} (h : IsSupportOf A x) : supp 𝔸 x ⊆ A := by
   intro a h'
   simp only [mem_supp] at h'
