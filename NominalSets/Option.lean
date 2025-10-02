@@ -136,7 +136,7 @@ lemma equivariant_elim
   replace hh : perm π (h x) = h (perm π x) := by
     ext y
     replace hh := hh.eq
-    simp only [Prod.perm_fst, Prod.perm_snd, Prod.forall, Prod.perm_mk] at hh
+    simp only [Prod.forall] at hh
     simp only [Function.perm_def, hh, perm_mul, mul_inv_cancel, perm_one]
   simp only [perm_elim, hf.eq, hg.eq, hh]
 

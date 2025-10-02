@@ -101,7 +101,7 @@ lemma isSupportedF_fold
   intro π hπ x
   replace hA : perm π (f x) = f (perm π x) := by
     ext y z
-    simp only [Prod.perm_fst, Prod.perm_snd, Prod.forall, Prod.perm_mk] at hA
+    simp only [Prod.forall] at hA
     simp (disch := grind) only [Function.perm_def, hA, perm_mul, mul_inv_cancel, perm_one]
   simp (disch := grind) only [perm_fold, hA, hB]
 

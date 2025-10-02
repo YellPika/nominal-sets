@@ -45,7 +45,7 @@ lemma isSupportedF_rec
   intro π hπ x
   replace hB : perm π (s x) = s (perm π x) := by
     ext n y
-    simp only [Prod.perm_fst, perm_discrete, Prod.perm_snd, Prod.forall, Prod.perm_mk] at hB
+    simp only [perm_discrete, Prod.forall] at hB
     simp (disch := grind) only [
       Function.perm_def, perm_discrete, hB,
       perm_mul, mul_inv_cancel, perm_one]
@@ -68,7 +68,7 @@ lemma equivariant_rec
   intro π x
   replace hB : perm π (s x) = s (perm π x) := by
     ext n y
-    simp only [Prod.perm_fst, perm_discrete, Prod.perm_snd, Prod.forall, Prod.perm_mk] at hB
+    simp only [perm_discrete, Prod.forall] at hB
     simp (disch := grind) only [
       Function.perm_def, perm_discrete, hB,
       perm_mul, mul_inv_cancel, perm_one]

@@ -34,7 +34,7 @@ lemma isSupportedF_pi
   use A
   intro π hπ x
   ext y
-  simp only [Prod.perm_fst, Prod.perm_snd, Prod.forall, Prod.perm_mk] at hA
+  simp only [Prod.forall] at hA
   simp (disch := grind) only [Function.perm_def, hA, perm_mul, mul_inv_cancel, perm_one]
 
 @[simp]
