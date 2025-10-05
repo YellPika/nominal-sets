@@ -50,4 +50,28 @@ lemma isSupportedF_pi_iff (f : X → Y → Z)
     exact hA
   · exact isSupportedF_pi
 
+lemma isSupportOf_apply
+    {A : Finset 𝔸} {f : X → Y} {x : X} (hf : IsSupportOf A f) (hx : IsSupportOf A x)
+    : IsSupportOf A (f x) := by
+  simp only [isSupportOf_def] at ⊢ hf hx
+  intro π hπ
+  replace hf := congr_fun (hf π hπ) (perm π x)
+  specialize hx π hπ
+  simp only [Function.perm_def, perm_mul, inv_mul_cancel, perm_one] at hf
+  simp only [hf, hx]
+
+lemma supp_apply [DecidableEq 𝔸] [Nominal 𝔸 X] [Nominal 𝔸 Y]
+    (A : Finset 𝔸) (f : X → Y) (hf : IsSupportOf A f) (x : X)
+    : supp 𝔸 (f x) \ supp 𝔸 x ⊆ A := by
+  intro a ha
+  simp only [Finset.mem_sdiff, mem_supp, not_forall] at ha
+  rcases ha with ⟨hfx, B, hB, ha⟩
+  by_contra ha'
+  have : a ∉ A ∪ B := by grind
+  apply this
+  apply hfx
+  apply isSupportOf_apply
+  · exact isSupportOf_union_left hf
+  · exact isSupportOf_union_right hB
+
 end NominalSets
