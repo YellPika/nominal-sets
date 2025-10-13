@@ -23,3 +23,6 @@ rev = "main"
 
 [[lean_lib]]
 name = "NominalSets"
+
+[[lean_lib]]
+name = "RenamingSets"
