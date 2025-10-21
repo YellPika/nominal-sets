@@ -598,6 +598,35 @@ noncomputable instance
         Decidable.not_not]
       grind
 
+instance
+    [Infinite 𝔸] [DecidableEq 𝔸] [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y]
+    : RenamingSet 𝔸 (Hom 𝔸 X Y) where
+  exists_support f := by
+    classical
+    use f.exists_support.choose
+    simp only [isSupportOf_def, rename_def]
+    intro σ₁ σ₂ hσ
+    apply ext_of_finset _ _ <|
+      f.exists_support.choose
+        ∪ σ₁.supp
+        ∪ σ₂.supp
+        ∪ f.exists_support.choose.image σ₁
+        ∪ f.exists_support.choose.image σ₂
+    intro x hx
+    rw [Partial.extend_eq, Partial.extend_eq]
+    · dsimp only [Partial.rename₀_toFun]
+      apply rename_congr
+      intro a ha
+      cases mem_supp' ha with
+      | inl h => exact hσ _ h
+      | inr h =>
+        have : σ₁ a = a ∧ σ₂ a = a := by
+          simp [Finset.ext_iff] at hx
+          grind
+        grind
+    · grind
+    · grind
+
 end Hom
 
 end RenamingSets
