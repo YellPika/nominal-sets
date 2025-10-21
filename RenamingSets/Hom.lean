@@ -627,6 +627,118 @@ instance
     · grind
     · grind
 
+lemma rename_apply
+    [Infinite 𝔸] [DecidableEq 𝔸] [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y]
+    (σ : Ren 𝔸) (f : Hom 𝔸 X Y) (x : X)
+    : rename σ (f x) = (rename σ f) (rename σ x) := by
+  classical
+  generalize hA
+    : f.exists_support.choose
+        ∪ (rename σ f).exists_support.choose
+        ∪ σ.supp
+        ∪ supp 𝔸 x
+        ∪ (supp 𝔸 x).image σ
+        ∪ f.exists_support.choose.image σ
+    = A
+  let τ := fresh A A
+  have : ∀a ∈ A, σ (τ a) = τ a := by
+    intro a ha
+    have : τ a ∉ σ.supp := by grind
+    simpa only [Ren.mem_supp, ne_eq, Decidable.not_not] using this
+  let τₜ := unfresh A A
+  let π : Ren 𝔸 := {
+    toFun a := if a ∈ A then τ a else if ∃b ∈ A, a = τ b then τₜ a else a
+    exists_support' := by
+      use A ∪ A.image τ
+      intro a ha
+      simp only [Finset.mem_union, Finset.mem_image, not_or, not_exists, not_and] at ha
+      grind
+  }
+  have π_coe {a} : π a = if a ∈ A then τ a else if ∃b ∈ A, a = τ b then τₜ a else a := rfl
+  let σ' := π * σ * π
+  have : ∀a ∈ supp 𝔸 x, (τₜ * σ' * τ) a = σ a := by
+    intro a ha
+    have h₁ : (fresh A A) a ∉ A := by grind
+    have h₂ : ∃ b ∈ A, (fresh A A) a = (fresh A A) b := by grind
+    have h₃ : unfresh A A (fresh A A a) = a := by grind
+    have h₄ : σ a ∈ A := by grind
+    simp only [unfresh_fresh₁, Ren.mul_coe, π_coe, h₁, ↓reduceIte, h₂, h₃, τₜ, σ', τ, h₄]
+  have : ∀a ∈ supp 𝔸 (f (rename τ x)), (τₜ * σ' * σ) a = (σ * τₜ) a := by
+    intro a ha
+    simp only [Ren.mul_coe, π_coe, σ']
+    replace ha := mem_supp' ha
+    cases ha with
+    | inl ha =>
+      replace ha : σ a ∈ A := by grind
+      have h₁ : σ (τ (σ a)) = τ (σ a) := by grind
+      have h₂ : τ (τ (σ a)) = τ (σ a) := by grind
+      have h₃ : ∃ b ∈ A, τ (σ a) = τ b := by grind
+      have h₄ : τₜ (τ (σ a)) = σ a := by grind
+      have h₅ : τₜ a = a := by grind
+      have h₆ : τₜ (σ a) = (σ a) := by grind
+      simp only [ha, ↓reduceIte, h₁, h₂, h₃, h₄, apply_ite, h₆, ite_self, h₅]
+    | inr ha =>
+      have ha' := supp_rename_subset' _ _ _ ha
+      rcases ha' with ⟨a, ha', rfl⟩
+      have h₁ : σ (τ a) = τ a := by grind
+      have h₂ : τ a ∉ A := by grind
+      have h₃ : ∃ b ∈ A, τ a = τ b := by grind
+      have h₄ : τₜ (τ a) = a := by grind
+      have h₅ : σ a ∈ A := by grind
+      have h₆ : τₜ (τ (σ a)) = (σ a) := by grind
+      simp only [h₁, h₂, ↓reduceIte, h₃, h₄, h₅, h₆]
+  have : ∀a ∈ (rename σ f).exists_support.choose, (τₜ * σ') a = a := by
+    intro a ha
+    have h₁ : a ∈ A := by grind
+    have h₂ : σ (τ a) = τ a := by grind
+    have h₃ : τ a ∉ A := by grind
+    have h₄ : ∃ b ∈ A, τ a = τ b := by grind
+    simp only [Ren.mul_coe, π_coe, h₁, ↓reduceIte, σ', h₂, h₃, h₄]
+    rw [unfresh_fresh₁]
+    · rw [unfresh_of_mem]
+      grind
+    · grind
+  have : rename σ x = rename (τₜ * σ') (rename τ x) := by
+    simp only [rename_mul]
+    apply rename_congr
+    grind
+  have : (rename σ f) (rename (τₜ * σ') (rename τ x))
+       = rename (τₜ * σ') (rename σ f (rename τ x)) := by
+    simp only [rename_mul]
+    rw [(rename σ f).exists_support.choose_spec (by grind)]
+    simp only [rename_mul]
+  have : rename σ f (rename τ x) = rename σ (f (rename τ x)) := by
+    simp only [rename_def]
+    rw [Partial.extend_eq]
+    · simp only [Partial.rename₀_toFun]
+    · ext a
+      simp only [Finset.union_assoc, Finset.mem_inter, Finset.mem_union, Ren.mem_supp, ne_eq,
+        Finset.mem_image, Finset.notMem_empty, iff_false, not_and, not_or, Decidable.not_not,
+        not_exists]
+      intro ha
+      replace ha := supp_rename_subset' _ _ _ ha
+      rcases ha with ⟨a, ha, rfl⟩
+      have : τ a ∉ A := by grind
+      refine ⟨?_, ?_, ?_⟩
+      · grind
+      · have : τ a ∉ σ.supp := by grind
+        simpa only [Ren.mem_supp, ne_eq, Decidable.not_not] using this
+      · grind
+  have : rename (τₜ * σ') (rename σ (f (rename τ x))) = rename (σ * τₜ) (f (rename τ x)) := by
+    simp only [rename_mul]
+    apply rename_congr
+    grind
+  have : rename (σ * τₜ) (f (rename τ x)) = rename σ (f (rename τₜ (rename τ x))) := by
+    nth_rw 2 [←f.exists_support.choose_spec]
+    · simp only [rename_mul]
+    · grind
+  have : rename τₜ (rename τ x) = x := by
+    simp only [rename_mul]
+    apply rename_congr'
+    simp only [Ren.mul_coe]
+    grind
+  grind
+
 end Hom
 
 end RenamingSets
