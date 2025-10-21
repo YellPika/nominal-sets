@@ -17,6 +17,7 @@ variable {𝔸 X Y Z : Type*} [PermAction 𝔸 X] [PermAction 𝔸 Y] [PermActio
 
 namespace Restrict
 
+attribute [coe] val
 attribute [simp] isSupported_val
 
 instance : CoeOut (Restrict 𝔸 X) X where
