@@ -23,6 +23,9 @@ instance : FunLike (Hom 𝔸 X Y) X Y where
     simp only [mk.injEq] at ⊢ h
     rw [h]
 
+@[simp]
+lemma coe_mk (f : X → Y) (hf : _) (x : X) : mk (𝔸 := 𝔸) f hf x = f x := rfl
+
 lemma exists_support (f : Hom 𝔸 X Y) : ∃ A : Finset 𝔸,
     ∀ ⦃σ⦄, (∀a ∈ A, σ a = a) →
     ∀ ⦃x⦄, rename σ (f x) = f (rename σ x) := by
@@ -790,6 +793,58 @@ lemma supp_subset
   replace ha := supp_rename_subset' _ _ _ ha
   simp only [Ren.restrict_coe, Finset.mem_singleton] at ha
   grind
+
+@[simps]
+private def curry₀
+    [Infinite 𝔸] [DecidableEq 𝔸]
+    [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y] [RenamingSet 𝔸 Z]
+    (f : Hom 𝔸 (X × Y) Z) (x : X)
+    : Hom 𝔸 Y Z where
+  toFun y := f (x, y)
+  exists_support' := by
+    use supp 𝔸 f ∪ supp 𝔸 x
+    intro σ hσ y
+    simp only [rename_apply, Prod.rename_mk]
+    rw [rename_congr', rename_congr']
+    · grind
+    · grind
+
+/-- Currying for morphisms. -/
+@[simps!]
+def curry
+    [Infinite 𝔸] [DecidableEq 𝔸]
+    [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y] [RenamingSet 𝔸 Z]
+    (f : Hom 𝔸 (X × Y) Z)
+    : Hom 𝔸 X (Hom 𝔸 Y Z) where
+  toFun := curry₀ f
+  exists_support' := by
+    use supp 𝔸 f
+    intro σ hσ x
+    apply ext_of_finset _ _ (supp 𝔸 x ∪ supp 𝔸 f ∪ σ.supp)
+    intro y hy
+    simp only [curry₀_toFun]
+    have : rename σ y = y := by
+      apply rename_congr'
+      simp only [Finset.union_assoc, Finset.ext_iff, Finset.mem_inter, Finset.mem_union,
+        Ren.mem_supp, ne_eq, Finset.notMem_empty, iff_false, not_and, not_or,
+        Decidable.not_not] at hy
+      grind
+    rw [←this, ← rename_apply]
+    simp only [curry₀_toFun, rename_apply, Prod.rename_mk]
+    rw [rename_congr']
+    grind
+
+/-- The evaluation morphism. -/
+@[simps]
+def eval
+    [Infinite 𝔸] [DecidableEq 𝔸]
+    [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y] [RenamingSet 𝔸 Z]
+    : Hom 𝔸 (Hom 𝔸 X Y × X) Y where
+  toFun x := x.1 x.2
+  exists_support' := by
+    use ∅
+    intro σ hσ x
+    simp only [rename_apply, Prod.rename_def]
 
 end Hom
 
