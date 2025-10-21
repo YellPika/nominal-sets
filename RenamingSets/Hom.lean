@@ -766,6 +766,31 @@ lemma supp_subset_iff
       grind
     grind
 
+lemma supp_subset
+    [Infinite 𝔸] [DecidableEq 𝔸] [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y]
+    (f : Hom 𝔸 X Y) (x : X)
+    : supp 𝔸 (f x) ⊆ supp 𝔸 f ∪ supp 𝔸 x := by
+  intro a ha
+  have : ∀ σ, (∀ a ∈ supp 𝔸 f, σ a = a) → ∀ x, rename σ (f x) = f (rename σ x) := by
+    rw [← supp_subset_iff]
+  simp only [Finset.mem_union]
+  by_contra! ha'
+  obtain ⟨b, hb⟩ := (supp 𝔸 f ∪ {a}).exists_notMem
+  specialize this
+    (.restrict {a} fun _ ↦ b)
+    (by simp only [Ren.restrict_coe, Finset.mem_singleton, ite_eq_right_iff]
+        grind)
+    x
+  have hx : (rename (Ren.restrict {a} fun x ↦ b) x) = x := by
+    apply rename_congr'
+    simp only [Ren.restrict_coe, Finset.mem_singleton, ite_eq_right_iff]
+    grind
+  rw [hx] at this
+  rw [←this] at ha
+  replace ha := supp_rename_subset' _ _ _ ha
+  simp only [Ren.restrict_coe, Finset.mem_singleton] at ha
+  grind
+
 end Hom
 
 end RenamingSets
