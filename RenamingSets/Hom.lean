@@ -739,6 +739,33 @@ lemma rename_apply
     grind
   grind
 
+lemma supp_subset_iff
+    [Infinite 𝔸] [DecidableEq 𝔸] [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y]
+    (f : Hom 𝔸 X Y) (A : Finset 𝔸)
+    : supp 𝔸 f ⊆ A ↔ ∀ σ, (∀ a ∈ A, σ a = a) → ∀ x, rename σ (f x) = f (rename σ x) := by
+  apply Iff.intro
+  · intro h σ hσ x
+    rw [rename_apply, rename_congr']
+    grind
+  · intro h
+    suffices IsSupportOf A f by exact supp_min this
+    simp only [isSupportOf_def']
+    intro σ hσ
+    apply ext_of_finset _ _ σ.supp
+    intro x hx
+    have : ∀a ∈ supp 𝔸 x, σ a = a := by
+      simp only [Finset.ext_iff, Finset.mem_inter, Ren.mem_supp] at hx
+      grind
+    have : f x = f (rename σ x) := by
+      rw [rename_congr']
+      grind
+    have : rename σ (f x) = rename σ f (rename σ x) := by
+      rw [rename_apply]
+    have : rename σ x = x := by
+      apply rename_congr'
+      grind
+    grind
+
 end Hom
 
 end RenamingSets
