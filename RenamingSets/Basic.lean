@@ -15,6 +15,45 @@ namespace Ren
 lemma exists_support (ρ : Ren 𝔸) : ∃A : Finset 𝔸, ∀a ∉ A, ρ a = a :=
   ρ.exists_support'
 
+@[ext]
+lemma ext {ρ₁ ρ₂ : Ren 𝔸} (h : ∀ a, ρ₁ a = ρ₂ a) : ρ₁ = ρ₂ := by
+  rcases ρ₁
+  rcases ρ₂
+  simp only [mk.injEq]
+  ext a
+  apply h
+
+instance : Monoid (Ren 𝔸) where
+  mul_assoc _ _ _ := by
+    simp only [Ren.ext_iff, mul_coe, implies_true]
+  one_mul _ := by
+    simp only [Ren.ext_iff, mul_coe, one_coe, implies_true]
+  mul_one _ := by
+    simp only [Ren.ext_iff, mul_coe, one_coe, implies_true]
+
+@[simp]
+lemma mem_supp (a : 𝔸) (ρ : Ren 𝔸) : a ∈ supp ρ ↔ ρ a ≠ a := by
+  apply Iff.intro
+  · simp only [supp, ne_eq, Finset.mem_filter, and_imp, imp_self, implies_true]
+  · intro h
+    simp only [supp, ne_eq, Finset.mem_filter, h, not_false_eq_true, and_true]
+    by_contra h'
+    apply h
+    apply ρ.exists_support'.choose_spec
+    exact h'
+
+@[simp]
+lemma swap_swap [DecidableEq 𝔸] (a b : 𝔸) : swap a b * swap a b = 1 := by
+  ext c
+  simp only [mul_coe, swap_coe, ite_eq_left_iff, one_coe]
+  grind
+
+@[simp]
+lemma swap_swap_r [DecidableEq 𝔸] (a b : 𝔸) (σ : Ren 𝔸) : swap a b * (swap a b * σ) = σ := by
+  ext c
+  simp only [mul_coe, swap_coe, ite_eq_left_iff]
+  grind
+
 end Ren
 
 /-! ## `RenameAction` -/
@@ -64,6 +103,7 @@ lemma isSupportOf_def
   · apply IsSupportOf.eq
   · apply IsSupportOf.mk
 
+@[grind ←]
 lemma isSupportOf_inter
     [DecidableEq 𝔸]
     {A B : Finset 𝔸} {x : X}
@@ -89,6 +129,7 @@ lemma isSupportOf_mono (x : X) : Monotone ((IsSupportOf · x) : Finset 𝔸 → 
   simp_all only [Finset.le_eq_subset, isSupportOf_def]
   grind
 
+@[grind ←]
 lemma isSupportOf_union_left
     [DecidableEq 𝔸]
     {A B : Finset 𝔸} {x : X}
@@ -96,6 +137,7 @@ lemma isSupportOf_union_left
   apply isSupportOf_mono
   simp only [Finset.le_eq_subset, Finset.subset_union_left]
 
+@[grind ←]
 lemma isSupportOf_union_right
     [DecidableEq 𝔸]
     {A B : Finset 𝔸} {x : X}
@@ -117,7 +159,7 @@ lemma supp_min {A : Finset 𝔸} {x : X} (h : IsSupportOf A x) : supp 𝔸 x ⊆
   simp only [mem_supp] at h'
   apply h' A h
 
-@[simp]
+@[simp, grind ←]
 lemma isSupportOf_supp
     (𝔸) [RenameAction 𝔸 X] [RenamingSet 𝔸 X] [Infinite 𝔸] (x : X)
     : IsSupportOf (supp 𝔸 x) x := by
@@ -178,6 +220,14 @@ lemma rename_congr
     : rename f x = rename g x := by
   have := isSupportOf_supp 𝔸 x
   apply this.eq
+  exact h
+
+lemma rename_congr'
+    [Infinite 𝔸]
+    {f : Ren 𝔸} (x : X) (h : ∀ a ∈ supp 𝔸 x, f a = a)
+    : rename f x = x := by
+  nth_rw 2 [← rename_one (𝔸 := 𝔸) x]
+  apply rename_congr
   exact h
 
 end RenamingSets

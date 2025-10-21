@@ -59,6 +59,22 @@ def restrict [DecidableEq 𝔸] (A : Finset 𝔸) (f : 𝔸 → 𝔸) : Ren 𝔸
     use A
     grind
 
+/-- The renaming which swaps two variables. -/
+@[simps]
+def swap [DecidableEq 𝔸] (a b : 𝔸) : Ren 𝔸 where
+  toFun c := if c = a then b else if c = b then a else c
+  exists_support' := by
+    use {a, b}
+    grind
+
+/--
+The support of a renaming `ρ` is the set of all elements on which `ρ` is _not_
+the identity.
+-/
+noncomputable def supp (ρ : Ren 𝔸) : Finset 𝔸 :=
+  open Classical in
+  ρ.exists_support'.choose.filter fun a ↦ ρ a ≠ a
+
 end Ren
 
 /-- A type with a (nominal) _renaming action_ is equipped with -/

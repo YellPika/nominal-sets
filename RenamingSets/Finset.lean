@@ -16,19 +16,20 @@ instance [DecidableEq X] : RenameAction 𝔸 (Finset X) where
     ext x
     apply rename_mul
 
-@[simp]
+@[simp, grind =]
 lemma mem_rename
     [DecidableEq X]
     (x : X) (σ : Ren 𝔸) (xs : Finset X)
     : x ∈ rename σ xs ↔ ∃x' ∈ xs, rename σ x' = x := by
   simp only [rename_def, Finset.mem_image]
 
-@[simp]
+@[simp, grind ←]
 lemma isSupportOf_empty [DecidableEq X] (A : Finset 𝔸) : IsSupportOf A (∅ : Finset X) := by
   simp only [
     isSupportOf_def, Finset.ext_iff, mem_rename, Finset.notMem_empty,
     false_and, exists_false, implies_true]
 
+@[grind ←]
 lemma isSupportOf_insert [DecidableEq X]
     (A : Finset 𝔸) (x : X) (xs : Finset X)
     (hx : IsSupportOf A x) (hxs : IsSupportOf A xs)
@@ -63,7 +64,7 @@ instance [DecidableEq X] : RenamingSet 𝔸 (Finset X) where
       · apply isSupportOf_union_left hA
       · apply isSupportOf_union_right hB
 
-@[simp]
+@[simp, grind =]
 lemma supp_empty [DecidableEq X] : supp 𝔸 (∅ : Finset X) = ∅ := by
   ext a
   simp only [mem_supp, isSupportOf_empty, forall_const, Finset.notMem_empty, iff_false, not_forall]
@@ -74,7 +75,6 @@ end Finset
 
 variable [RenamingSet 𝔸 X]
 
-@[simp]
 lemma supp_rename_subset
     [Infinite 𝔸] [DecidableEq 𝔸] (σ : Ren 𝔸) (x : X)
     : supp 𝔸 (rename σ x) ⊆ rename σ (supp 𝔸 x) := by
@@ -89,6 +89,16 @@ lemma supp_rename_subset
   simp only [Ren.mul_coe]
   exact hfg
 
+@[grind →]
+lemma supp_rename_subset'
+    [Infinite 𝔸] [DecidableEq 𝔸] (σ : Ren 𝔸) (x : X)
+    : ∀ a ∈ supp 𝔸 (rename σ x), ∃ b ∈ supp 𝔸 x, σ b = a := by
+  intro a ha
+  have := supp_rename_subset _ _ ha
+  simp only [Finset.mem_rename, rename_def] at this
+  exact this
+
+@[simp, grind =]
 lemma supp_rename
     [Infinite 𝔸] [DecidableEq 𝔸]
     (σ : Ren 𝔸) (x : X) (hσ : (supp 𝔸 x).toSet.InjOn σ)

@@ -10,13 +10,13 @@ instance : RenameAction 𝔸 (X × Y) where
   rename_one := by simp only [rename_one, Prod.mk.eta, implies_true]
   rename_mul := by simp only [rename_mul, implies_true]
 
-@[simp]
+@[simp, grind =]
 lemma rename_mk
     (σ : Ren 𝔸) (x : X) (y : Y)
     : rename σ (x, y) = (rename σ x, rename σ y) := by
   simp only [rename_def]
 
-@[simp]
+@[simp, grind =]
 lemma isSupportOf_mk
     (A : Finset 𝔸) (x : X) (y : Y)
     : IsSupportOf A (x, y) ↔ IsSupportOf A x ∧ IsSupportOf A y := by
@@ -45,7 +45,7 @@ instance : RenamingSet 𝔸 (X × Y) where
     · apply isSupportOf_union_left hA
     · apply isSupportOf_union_right hB
 
-@[simp]
+@[simp, grind =]
 lemma supp_mk [DecidableEq 𝔸] (x : X) (y : Y) : supp 𝔸 (x, y) = supp 𝔸 x ∪ supp 𝔸 y := by
   ext a
   simp only [mem_supp, isSupportOf_mk, and_imp, Finset.mem_union]
