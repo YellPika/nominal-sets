@@ -92,7 +92,7 @@ instance [Nominal 𝔸 X] : Nominal 𝔸 (Finset X) where
       · exact hx
       · intro a ha
         nth_rw 1 [← hπ a x hx ha]
-        simp only [Perm.inv_toFun, Perm.left_inverse]
+        simp only [Perm.left_inverse]
 
 @[simp]
 lemma perm_supp
@@ -100,14 +100,14 @@ lemma perm_supp
     (π : Perm 𝔸) (x : X)
     : perm π (supp 𝔸 x) = supp 𝔸 (perm π x):= by
   ext a
-  simp only [mem_perm, PermAction.perm_def, Perm.inv_toFun, mem_supp, isSupportOf_perm]
+  simp only [mem_perm, PermAction.perm_def, mem_supp, isSupportOf_perm]
   apply Iff.intro
   · intro h A hA
-    specialize h (A.image π.invFun) hA
-    simp only [Finset.mem_image, Perm.invFun_inj, exists_eq_right] at h
+    specialize h (A.image (π⁻¹ : Perm 𝔸)) hA
+    simp only [Finset.mem_image, Perm.coe_inj, exists_eq_right] at h
     exact h
   · intro h A hA
-    specialize h (A.image π.toFun)
+    specialize h (A.image π)
     simp +unfoldPartialApp only [
       Finset.image_image, Function.comp, Perm.left_inverse,
       Finset.image_id', hA, Finset.mem_image, forall_const] at h

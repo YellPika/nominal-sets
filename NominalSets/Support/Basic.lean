@@ -20,7 +20,7 @@ lemma isSupportOf_def
 lemma isSupportOf_perm
     [DecidableEq 𝔸]
     (A : Finset 𝔸) (π : Perm 𝔸) (x : X)
-    : IsSupportOf A (perm π x) ↔ IsSupportOf (A.image π.invFun) x := by
+    : IsSupportOf A (perm π x) ↔ IsSupportOf (A.image (π⁻¹ : Perm 𝔸)) x := by
   apply Iff.intro
   · rintro ⟨hA⟩
     constructor
@@ -29,7 +29,7 @@ lemma isSupportOf_perm
     have : ∀a ∈ A, (π  * π' * π⁻¹) a = a := by
       intro a ha
       specialize hπ' a ha
-      simp only [Perm.mul_toFun, Perm.inv_toFun, hπ', Perm.right_inverse]
+      simp only [Perm.mul_coe, hπ', Perm.right_inverse]
     specialize hA _ this
     simp only [perm_mul, inv_mul_cancel_right] at hA
     simp only [← perm_mul, perm_inj] at hA
@@ -39,8 +39,7 @@ lemma isSupportOf_perm
     intro π' hπ'
     simp only [Finset.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂] at hA
     specialize hA (π⁻¹ * π' * π) (by simp_all only [
-      Perm.mul_toFun, Perm.right_inverse,
-      Perm.inv_toFun, implies_true])
+      Perm.mul_coe, Perm.right_inverse, implies_true])
     simp only [← perm_mul] at hA
     nth_rw 2 [←hA]
     simp only [perm_mul, Perm.mul_assoc, mul_inv_cancel_left]
@@ -52,7 +51,7 @@ lemma isSupportOf_univ [Fintype 𝔸] (x : X) : IsSupportOf (Finset.univ : Finse
   intro π hπ
   have : π = 1 := by
     ext
-    simp only [hπ, Perm.one_toFun]
+    simp only [hπ, Perm.one_coe]
   simp only [this, PermAction.perm_one]
 
 lemma isSupportOf_monotone (x : X) : Monotone (IsSupportOf (𝔸 := 𝔸) · x) := by
@@ -73,7 +72,7 @@ lemma isSupportOf_swap
   · intro hx a b ha hb
     apply hx.eq
     intro c hc
-    simp only [Perm.swap_toFun]
+    simp only [Perm.swap_coe]
     grind
   · intro h
     constructor
@@ -84,7 +83,7 @@ lemma isSupportOf_swap
       simp only [Finset.notMem_empty, not_false_eq_true, forall_const] at hπ'
       have : π = 1 := by
         ext
-        simp only [hπ', Perm.one_toFun]
+        simp only [hπ', Perm.one_coe]
       simp only [this, PermAction.perm_one]
     | insert a s ha ih =>
       by_cases hfaa : π a = a
@@ -95,14 +94,14 @@ lemma isSupportOf_swap
           · simp only [hab, hfaa]
           · apply hπ'
             simp only [Finset.mem_insert, hab, hb, or_self, not_false_eq_true]
-      · have hfa : ¬π.invFun a = a := by
+      · have hfa : ¬π⁻¹ a = a := by
           intro hfa
           have := congr_arg π hfa
           simp only [Perm.right_inverse] at this
           grind
-        have hfa' : π.invFun a ∈ s := by
+        have hfa' : π⁻¹ a ∈ s := by
           by_contra hfa'
-          specialize hπ' (π.invFun a)
+          specialize hπ' (π⁻¹ a)
           simp only [
             Finset.mem_insert, hfa, hfa', or_self, not_false_eq_true,
             Perm.right_inverse, forall_const] at hπ'
@@ -111,12 +110,12 @@ lemma isSupportOf_swap
           intro ha'
           specialize hπ a ha'
           contradiction
-        have hfa'' : π.invFun a ∉ A := by
+        have hfa'' : π⁻¹ a ∉ A := by
           intro hfa''
-          specialize hπ (π.invFun a) hfa''
+          specialize hπ (π⁻¹ a) hfa''
           simp only [Perm.right_inverse] at hπ
           grind
-        specialize ih (A \ {a}) x ?_ (π * (.swap a (π.invFun a))) ?_ ?_
+        specialize ih (A \ {a}) x ?_ (π * (.swap a (π⁻¹ a))) ?_ ?_
         · intro b c hb hc
           simp only [Finset.mem_sdiff, Finset.mem_singleton, not_and, Decidable.not_not] at hb hc
           by_cases hba : b = a
@@ -135,15 +134,15 @@ lemma isSupportOf_swap
         · intro b hb
           simp only [Finset.mem_sdiff, Finset.mem_singleton] at hb
           have hab : a ≠ b := by grind
-          have hfab : π.invFun a ≠ b := by grind
-          simp only [Perm.mul_toFun, Perm.swap_toFun, hab, ↓reduceIte, hfab]
+          have hfab : π⁻¹ a ≠ b := by grind
+          simp only [Perm.mul_coe, Perm.swap_coe, hab, ↓reduceIte, hfab]
           apply hπ
           exact hb.1
         · intro b hb
           by_cases hab : a = b
-          · simp only [hab, Perm.mul_toFun, Perm.swap_toFun, ↓reduceIte, Perm.right_inverse]
-          · have hfab : π.invFun a ≠ b := by grind
-            simp only [Perm.mul_toFun, Perm.swap_toFun, hab, ↓reduceIte, hfab]
+          · simp only [hab, Perm.mul_coe, Perm.swap_coe, ↓reduceIte, Perm.right_inverse]
+          · have hfab : π⁻¹ a ≠ b := by grind
+            simp only [Perm.mul_coe, Perm.swap_coe, hab, ↓reduceIte, hfab]
             apply hπ'
             simp only [Finset.mem_insert, hb, or_false]
             grind
@@ -184,7 +183,7 @@ lemma isSupportOf_inter
 
   have : Perm.swap a b = Perm.swap a c * Perm.swap b c * Perm.swap a c := by
     ext d
-    simp only [Perm.swap_toFun, Perm.mul_toFun, left_eq_ite_iff]
+    simp only [Perm.swap_coe, Perm.mul_coe, left_eq_ite_iff]
     grind
   simp only [this, ←PermAction.perm_mul]
 
@@ -219,7 +218,7 @@ lemma isSupported_perm (π : Perm 𝔸) (x : X) : IsSupported 𝔸 (perm π x) �
   classical
   apply Iff.intro
   · rintro ⟨A, hA⟩
-    use Finset.image π.invFun A
+    use Finset.image (π⁻¹ : Perm 𝔸) A
     simp only [isSupportOf_perm] at hA
     exact hA
   · rintro ⟨A, hA⟩
@@ -396,7 +395,7 @@ lemma mem_supp'
       rw [Perm.swap_comm, hb]
     have : Perm.swap b c = Perm.swap a b * Perm.swap a c * Perm.swap a b := by
       ext d
-      simp only [Perm.swap_toFun, Perm.mul_toFun]
+      simp only [Perm.swap_coe, Perm.mul_coe]
       grind
     simp [this, ←PermAction.perm_mul, hc, hb]
   · intro h
@@ -405,7 +404,7 @@ lemma mem_supp'
     by_contra ha
     obtain ⟨b, hb⟩ := h.exists_notMem_finset (A ∪ {a})
     simp only [ne_eq, Set.mem_setOf_eq, Finset.union_singleton, Finset.mem_insert, not_or] at hb
-    specialize hA (.swap a b) (by simp only [Perm.swap_toFun]; grind)
+    specialize hA (.swap a b) (by simp only [Perm.swap_coe]; grind)
     grind
 
 lemma supp_min [Nominal 𝔸 X] {A : Finset 𝔸} {x : X} (h : IsSupportOf A x) : supp 𝔸 x ⊆ A := by

@@ -22,7 +22,7 @@ lemma mem_supp (π : Perm 𝔸) (a : 𝔸) : a ∈ supp π ↔ π a ≠ a := by
 @[simp]
 lemma isSupportOf_supp (π : Perm 𝔸) : IsSupportOf π.supp π := by
   constructor
-  simp only [Perm.mem_supp, ne_eq, perm_def]
+  simp only [mem_supp, ne_eq, perm_def]
   intro π' hπ'
   have : ∀a, π a = a ∨ π' a = a := by grind
   have {a} : π (π' a) = π' (π a) := by
@@ -32,19 +32,19 @@ lemma isSupportOf_supp (π : Perm 𝔸) : IsSupportOf π.supp π := by
       cases this (π' a) with
       | inl h' => exact h'
       | inr h' =>
-        have := congr_arg π'.invFun h'
-        simp only [Perm.left_inverse] at this
+        have := congr_arg (π'⁻¹ : Perm 𝔸) h'
+        simp only [left_inverse] at this
         simp only [this, h]
     | inr h =>
       simp only [h]
       cases this (π a) with
       | inl h' =>
-        have := congr_arg π.invFun h'
-        simp only [Perm.left_inverse] at this
+        have := congr_arg (π⁻¹ : Perm 𝔸) h'
+        simp only [left_inverse] at this
         simp only [this, h]
       | inr h' => simp only [h']
   ext a
-  simp only [Perm.mul_toFun, Perm.inv_toFun, ← this, Perm.right_inverse]
+  simp only [mul_coe, ← this, right_inverse]
 
 instance : Nominal 𝔸 (Perm 𝔸) where
   supported π := by
@@ -70,7 +70,7 @@ lemma supp_eq [Infinite 𝔸] (π : Perm 𝔸) : NominalSets.supp 𝔸 π = π.s
     specialize hA ha' hb.2.2
     rw [Perm.ext_iff] at hA
     specialize hA a
-    simp only [Perm.perm_def, Perm.inv_swap, Perm.mul_toFun, Perm.swap_toFun, ↓reduceIte] at hA
+    simp only [perm_def, inv_swap, mul_coe, swap_coe, ↓reduceIte] at hA
     by_cases hbb : b = π b
     · simp only [← hbb, ↓reduceIte] at hA
       grind
@@ -79,7 +79,7 @@ lemma supp_eq [Infinite 𝔸] (π : Perm 𝔸) : NominalSets.supp 𝔸 π = π.s
       · subst hab
         grind
       · simp only [hab, ↓reduceIte] at hA
-        replace hA := Perm.injective π hA
+        replace hA := coe_injective π hA
         grind
 
 end NominalSets.Perm

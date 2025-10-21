@@ -46,8 +46,8 @@ instance : Inhabited (PermAction 𝔸 X) where
 @[simps]
 instance (priority := default) : PermAction 𝔸 𝔸 where
   perm π x := π x
-  perm_one := by simp only [Perm.one_toFun, implies_true]
-  perm_mul := by simp only [Perm.mul_toFun, implies_true]
+  perm_one := by simp only [Perm.one_coe, implies_true]
+  perm_mul := by simp only [Perm.mul_coe, implies_true]
 
 end PermAction
 
