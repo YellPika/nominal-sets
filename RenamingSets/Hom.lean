@@ -387,8 +387,8 @@ lemma rename_apply
 
 lemma supp_subset_iff
     (f : Hom 𝔸 X Y) (A : Finset 𝔸)
-    : supp 𝔸 f ⊆ A
-    ↔ ∀ σ, (∀ a ∈ A, σ a = a) → ∀ x, rename σ (f x) = f (rename σ x) := by
+    : supp 𝔸 f ⊆ A ↔ IsSupportOfF A f := by
+  simp only [isSupportOfF_def]
   apply Iff.intro
   · intro h σ hσ x
     rw [← rename_apply, rename_congr']
@@ -417,7 +417,9 @@ lemma supp_subset
     : supp 𝔸 (f x) ⊆ supp 𝔸 f ∪ supp 𝔸 x := by
   intro a ha
   have : ∀ σ, (∀ a ∈ supp 𝔸 f, σ a = a) → ∀ x, rename σ (f x) = f (rename σ x) := by
-    rw [← supp_subset_iff]
+    have := supp_subset_iff f (supp 𝔸 f)
+    simp only [subset_refl, true_iff] at this
+    exact this.eq
   simp only [Finset.mem_union]
   by_contra! ha'
   obtain ⟨b, hb⟩ := (supp 𝔸 f ∪ {a}).exists_notMem

@@ -2,7 +2,7 @@ import RenamingSets.Prod
 
 namespace RenamingSets
 
-variable {𝔸 X : Type*} [RenameAction 𝔸 X]
+variable {𝔸 X Y : Type*} [RenameAction 𝔸 X] [RenameAction 𝔸 Y]
 
 namespace Finset
 
@@ -81,7 +81,7 @@ lemma supp_empty [DecidableEq X] : supp 𝔸 (∅ : Finset X) = ∅ := by
 
 end Finset
 
-variable [RenamingSet 𝔸 X]
+variable [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y]
 
 lemma supp_rename_subset
     [Infinite 𝔸] [DecidableEq 𝔸] (σ : Ren 𝔸) (x : X)
@@ -178,5 +178,29 @@ lemma isSupportOf_def'
     specialize @h (.restrict {a} fun _ ↦ b)
     simp only [Ren.restrict_coe, Finset.mem_singleton, ite_eq_right_iff] at h
     grind
+
+lemma supp_apply
+    [Infinite 𝔸] [DecidableEq 𝔸]
+    {A : Finset 𝔸} {f : X → Y} (hf : IsSupportOfF A f) (x)
+    : supp 𝔸 (f x) ⊆ A ∪ supp 𝔸 x := by
+  classical
+  rcases hf with ⟨hf⟩
+  intro a ha
+  by_contra! ha'
+  obtain ⟨b, hb⟩ := (A ∪ {a}).exists_notMem
+  have hx : rename (Ren.restrict {a} fun _ ↦ b) x = x := by
+    apply rename_congr'
+    simp only [Ren.restrict_coe, Finset.mem_singleton, ite_eq_right_iff]
+    grind
+  have := hf
+    (σ := .restrict {a} fun _ ↦ b)
+    (by simp only [Ren.restrict_coe, Finset.mem_singleton, ite_eq_right_iff]
+        grind)
+    (x := x)
+  rw [hx] at this
+  rw [←this] at ha
+  replace ha := supp_rename_subset' _ _ _ ha
+  simp only [Ren.restrict_coe, Finset.mem_singleton] at ha
+  grind
 
 end RenamingSets

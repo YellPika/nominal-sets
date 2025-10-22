@@ -1,4 +1,5 @@
 import RenamingSets.Finset
+import RenamingSets.Ren.Base
 import RenamingSets.Ren.Fresh
 import RenamingSets.Ren.Transfer
 
@@ -204,6 +205,15 @@ lemma isSupportOfF_extend
   apply lemma₂
   exact supp_subset f ⟨rename μ x, _⟩ ha
 
+@[simp, grind ←]
+lemma isSupportOfF_extend'
+    [Infinite 𝔸] {A B : Finset 𝔸}
+    (f : PartialHom A X Y) (h : A ⊆ B)
+    : IsSupportOfF B (extend f) := by
+  apply isSupportOfF_mono
+  · exact h
+  · apply isSupportOfF_extend
+
 @[simp, grind ←, fun_prop]
 lemma isSupportedF_extend
     [Infinite 𝔸] {A : Finset 𝔸}
@@ -211,6 +221,109 @@ lemma isSupportedF_extend
     : IsSupportedF 𝔸 (extend f) := by
   use A
   simp only [isSupportOfF_extend]
+
+/-- Every finitely-supported function gives rise to a partial renaming function. -/
+@[simps]
+def rename
+    [Infinite 𝔸]
+    (σ : Ren 𝔸) {A : Finset 𝔸} {f : X → Y} (hf : IsSupportOfF A f)
+    : PartialHom (A ∪ σ.supp ∪ A.image σ) X Y where
+  toFun x := RenamingSets.rename σ (f x)
+  supported' σ' hσ' x hx₁ hx₂ := by
+    dsimp only
+
+    replace hx₁ : ∀ a ∈ supp 𝔸 x, a ∉ A ∧ a ∉ σ.supp ∧ a ∉ A.image σ := by
+      simp only [
+        Finset.union_assoc, Finset.ext_iff, Finset.mem_inter, Finset.mem_union,
+        Finset.notMem_empty, iff_false, not_and, not_or] at hx₁
+      exact hx₁
+
+    replace hx₂ : ∀ a ∈ supp 𝔸 (RenamingSets.rename σ' x), a ∉ A ∧ a ∉ σ.supp ∧ a ∉ A.image σ := by
+      simp only [
+        Finset.union_assoc, Finset.ext_iff, Finset.mem_inter, Finset.mem_union,
+        Finset.notMem_empty, iff_false, not_and, not_or] at hx₂
+      exact hx₂
+
+    let μ : Ren 𝔸 := .base (supp 𝔸 x) σ'
+
+    have lemma₁ : RenamingSets.rename σ' x = RenamingSets.rename σ' (RenamingSets.rename μ x) := by
+      simp only [rename_mul]
+      apply rename_congr
+      simp only [Ren.mul_base, implies_true, μ]
+    rw [lemma₁]
+
+    have lemma₂
+        : f (RenamingSets.rename σ' (RenamingSets.rename μ x))
+        = RenamingSets.rename σ' (f (RenamingSets.rename μ x)) := by
+      rw [hf.eq]
+      intro a ha
+      apply hσ'
+      simp only [Finset.union_assoc, Finset.mem_union, ha, Finset.mem_image, true_or]
+    rw [lemma₂]
+
+    have lemma₃
+        : RenamingSets.rename σ (RenamingSets.rename σ' (f (RenamingSets.rename μ x)))
+        = RenamingSets.rename σ' (RenamingSets.rename σ (f (RenamingSets.rename μ x))) := by
+      simp only [rename_mul]
+      apply rename_congr
+      intro a ha
+      simp only [Ren.mul_coe]
+      have := supp_apply hf _ ha
+      simp only [Finset.mem_union] at this
+      cases this with
+      | inl this =>
+        rw [hσ', hσ'] <;> grind
+      | inr this =>
+        have h₁ : σ' a ∈ supp 𝔸 (RenamingSets.rename σ' x) := by
+          rw [lemma₁, supp_rename]
+          · simp only [Finset.mem_rename, rename_def]
+            use a
+          · intro b hb c hc hbc
+            rcases supp_rename_subset' _ _ _ hb with ⟨b, hb', rfl⟩
+            rcases supp_rename_subset' _ _ _ hc with ⟨c, hc', rfl⟩
+            simpa only [hb', hc', Ren.base_eq_iff, Ren.coe_base, μ] using hbc
+        have h₂ : a ∈ supp 𝔸 x := by
+          rcases supp_rename_subset' _ _ _ this with ⟨a, ha', rfl⟩
+          simp only [Ren.base_of_mem, ha', μ]
+        have h₃ : σ (σ' a) = σ' a := by
+          have h : σ' a ∉ σ.supp := by grind
+          simpa only [Ren.mem_supp, ne_eq, Decidable.not_not] using h
+        have h₄ : σ a = a := by
+          have h : a ∉ σ.supp := by grind
+          simpa only [Ren.mem_supp, ne_eq, Decidable.not_not] using h
+        simp only [h₃, h₄]
+    rw [lemma₃]
+
+    have lemma₄ : f (RenamingSets.rename μ x) = RenamingSets.rename μ (f x) := by
+      rw [hf.eq]
+      intro a ha
+      have h : a ∉ supp 𝔸 x := by grind
+      simp only [h, not_false_eq_true, Ren.base_of_notMem, μ]
+    rw [lemma₄]
+
+    have lemma₅
+        : RenamingSets.rename σ (RenamingSets.rename μ (f x))
+        = RenamingSets.rename μ (RenamingSets.rename σ (f x)) := by
+      simp only [rename_mul]
+      apply rename_congr
+      intro a ha
+      replace ha := supp_apply hf _ ha
+      simp only [Finset.mem_union] at ha
+      cases ha with
+      | inl ha =>
+        simp only [Ren.mul_coe]
+        have h₁ : a ∉ supp 𝔸 x := by grind
+        have h₂ : σ a ∉ supp 𝔸 x := by grind
+        simp only [h₁, not_false_eq_true, Ren.base_of_notMem, h₂, μ]
+      | inr ha =>
+        have : σ a = a ∧ σ (μ a) = μ a := by
+          simp only [Ren.mem_supp, ne_eq, Decidable.not_not] at hx₁
+          have : μ a ∈ supp 𝔸 x := by grind
+          simp only [ha, hx₁, this, and_self]
+        simp only [Ren.mul_coe, this]
+    rw [lemma₅]
+
+    simp only [rename_mul, Ren.mul_base_r, μ]
 
 end PartialHom
 
