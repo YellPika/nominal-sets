@@ -1,4 +1,4 @@
-import RenamingSets.Basic
+import RenamingSets.Support.Basic
 
 namespace RenamingSets.Prod
 

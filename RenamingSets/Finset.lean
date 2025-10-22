@@ -89,7 +89,6 @@ lemma supp_rename_subset
   simp only [Ren.mul_coe]
   exact hfg
 
-@[grind →]
 lemma supp_rename_subset'
     [Infinite 𝔸] [DecidableEq 𝔸] (σ : Ren 𝔸) (x : X)
     : ∀ a ∈ supp 𝔸 (rename σ x), ∃ b ∈ supp 𝔸 x, σ b = a := by

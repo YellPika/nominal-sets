@@ -1,6 +1,6 @@
 # nominal-sets
 
-This is a formalization of nominal sets.
+This is a formalization of nominal sets and nominal renaming sets.
 
 ## Usage
 
