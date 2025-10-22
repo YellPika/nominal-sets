@@ -2,7 +2,7 @@ import RenamingSets.Support.Basic
 
 namespace RenamingSets.Prod
 
-variable {𝔸 X Y : Type*} [RenameAction 𝔸 X] [RenameAction 𝔸 Y]
+variable {𝔸 X Y Z : Type*} [RenameAction 𝔸 X] [RenameAction 𝔸 Y] [RenameAction 𝔸 Z]
 
 @[simps -isSimp]
 instance : RenameAction 𝔸 (X × Y) where
@@ -30,6 +30,60 @@ lemma isSupportOf_mk
       apply (h h').2
   · simp only [isSupportOf_def, rename_mk, Prod.mk.injEq, and_imp]
     grind
+
+@[simp, grind ←]
+lemma isSupportOfF_fst
+    (A : Finset 𝔸)
+    : IsSupportOfF A (Prod.fst : X × Y → X) := by
+  simp only [isSupportOfF_def, Prod.forall, rename_mk, implies_true]
+
+@[simp, fun_prop]
+lemma isSupportedF_fst : IsSupportedF 𝔸 (Prod.fst : X × Y → X) := by
+  use ∅
+  simp only [isSupportOfF_fst, isSupportOfF_id', isSupportOfF_comp']
+
+@[simp, fun_prop]
+lemma isSupportedF_fst'
+    {f : X → Y × Z} (hf : IsSupportedF 𝔸 f)
+    : IsSupportedF 𝔸 (fun x ↦ (f x).1) := by
+  fun_prop
+
+@[simp, grind ←]
+lemma isSupportOfF_snd
+    (A : Finset 𝔸)
+    : IsSupportOfF A (Prod.snd : X × Y → Y) := by
+  simp only [isSupportOfF_def, Prod.forall, rename_mk, implies_true]
+
+@[simp, fun_prop]
+lemma isSupportedF_snd : IsSupportedF 𝔸 (Prod.snd : X × Y → Y) := by
+  use ∅
+  simp only [isSupportOfF_snd, isSupportOfF_id', isSupportOfF_comp']
+
+@[simp, fun_prop]
+lemma isSupportedF_snd'
+    {f : X → Y × Z} (hf : IsSupportedF 𝔸 f)
+    : IsSupportedF 𝔸 (fun x ↦ (f x).2) := by
+  fun_prop
+
+@[simp, grind →]
+lemma isSupportOfF_mk
+    (A : Finset 𝔸)
+    {f : X → Y} (hf : IsSupportOfF A f)
+    {g : X → Z} (hg : IsSupportOfF A g)
+    : IsSupportOfF A (fun x ↦ (f x, g x)) := by
+  simp only [isSupportOfF_def, rename_mk, Prod.mk.injEq] at ⊢ hf hg
+  grind
+
+@[simp, fun_prop]
+lemma isSupportedF_mk
+    {f : X → Y} (hf : IsSupportedF 𝔸 f)
+    {g : X → Z} (hg : IsSupportedF 𝔸 g)
+    : IsSupportedF 𝔸 (fun x ↦ (f x, g x)) := by
+  classical
+  obtain ⟨A, hA⟩ := hf
+  obtain ⟨B, hB⟩ := hg
+  use A ∪ B
+  apply isSupportOfF_mk <;> grind
 
 variable [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y]
 

@@ -6,13 +6,6 @@ namespace RenamingSets
 
 variable {𝔸 X Y Z : Type*} [RenameAction 𝔸 X] [RenameAction 𝔸 Y] [RenameAction 𝔸 Z]
 
-variable (𝔸) in
-/-- A function `f : X → Y` is _equivariant_ if it preserves renamings. -/
-@[fun_prop]
-structure Equivariant (f : X → Y) : Prop where
-  /-- Renamings are preserved by `f`. -/
-  eq (σ : Ren 𝔸) x : rename σ (f x) = f (rename σ x)
-
 /--
 A set `A` is a _support_ of an element `x` if applying any two renamings behaves
 identically as long as the renamings agree on `A`.
@@ -22,6 +15,31 @@ Intuitively, `A` can be thought of as a superset of `x`'s free variables.
 structure IsSupportOf (A : Finset 𝔸) (x : X) where
   /-- Applying any two renamings behaves identically as long as the renamings agree on `A`. -/
   eq ⦃f g⦄ : (∀a ∈ A, f a = g a) → rename f x = rename g x
+
+/-- An alternative formulation of support for functions. -/
+structure IsSupportOfF (A : Finset 𝔸) (f : X → Y) where
+  /-- Any renaming which does not touch the support commutes with the function. -/
+  eq ⦃σ : Ren 𝔸⦄ : (∀a ∈ A, σ a = a) → ∀x, rename σ (f x) = f (rename σ x)
+
+variable (𝔸) in
+/-- An element `x : X` is _supported_ if it has a finite support. -/
+inductive IsSupported (x : X) : Prop where
+  /-- Applying any two renamings behaves identically as long as the renamings agree on `A`. -/
+  | intro (A : Finset 𝔸) : IsSupportOf A x → IsSupported x
+
+variable (𝔸) in
+/-- An alternative formulation of supportedness for functions. -/
+@[fun_prop]
+inductive IsSupportedF (f : X → Y) : Prop where
+  /-- Any renaming which does not touch the support commutes with the function. -/
+  | intro (A : Finset 𝔸) : IsSupportOfF A f → IsSupportedF f
+
+variable (𝔸) in
+/-- A function `f : X → Y` is _equivariant_ if it preserves renamings. -/
+@[fun_prop]
+structure Equivariant (f : X → Y) : Prop where
+  /-- Renamings are preserved by `f`. -/
+  eq (σ : Ren 𝔸) x : rename σ (f x) = f (rename σ x)
 
 /--
 A (nominal) _renaming set_ is a type with a renaming action such that every
