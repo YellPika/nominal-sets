@@ -161,12 +161,14 @@ lemma extend_eq
   · grind
   · grind
 
-@[simp, grind =]
-lemma extend_supported
+@[simp, grind ←]
+lemma isSupportOfF_extend
     [Infinite 𝔸] {A : Finset 𝔸}
     (f : PartialHom A X Y)
-    {σ : Ren 𝔸} (hσ : ∀ a ∈ A, σ a = a) (x)
-    : rename σ (f.extend x) = f.extend (rename σ x) := by
+    : IsSupportOfF A (extend f) := by
+  simp only [isSupportOfF_def]
+  intro σ hσ x
+
   let τ := Ren.fresh (rename σ (supp 𝔸 x)) A
   let τ' := Ren.unfresh (rename σ (supp 𝔸 x)) A
   let μ := Ren.fresh (supp 𝔸 x) A
@@ -201,6 +203,14 @@ lemma extend_supported
   intro a ha
   apply lemma₂
   exact supp_subset f ⟨rename μ x, _⟩ ha
+
+@[simp, grind ←, fun_prop]
+lemma isSupportedF_extend
+    [Infinite 𝔸] {A : Finset 𝔸}
+    (f : PartialHom A X Y)
+    : IsSupportedF 𝔸 (extend f) := by
+  use A
+  simp only [isSupportOfF_extend]
 
 end PartialHom
 

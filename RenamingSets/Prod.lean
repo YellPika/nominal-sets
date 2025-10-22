@@ -31,16 +31,37 @@ lemma isSupportOf_mk
   · simp only [isSupportOf_def, rename_mk, Prod.mk.injEq, and_imp]
     grind
 
+@[simp, grind =]
+lemma isSupported_mk
+    (x : X) (y : Y)
+    : IsSupported 𝔸 (x, y) ↔ IsSupported 𝔸 x ∧ IsSupported 𝔸 y := by
+  classical
+  apply Iff.intro
+  · grind [isSupported_def]
+  · simp only [isSupported_def, isSupportOf_mk, and_imp, forall_exists_index]
+    intro A hA B hB
+    use A ∪ B
+    grind
+
 @[simp, grind ←]
 lemma isSupportOfF_fst
     (A : Finset 𝔸)
     : IsSupportOfF A (Prod.fst : X × Y → X) := by
   simp only [isSupportOfF_def, Prod.forall, rename_mk, implies_true]
 
-@[simp, fun_prop]
+@[simp, local fun_prop]
+lemma equivariant_fst : Equivariant 𝔸 (Prod.fst : X × Y → X) := by
+  simp only [equivariant_def, isSupportOfF_fst]
+
+@[simp, local fun_prop]
 lemma isSupportedF_fst : IsSupportedF 𝔸 (Prod.fst : X × Y → X) := by
-  use ∅
-  simp only [isSupportOfF_fst, isSupportOfF_id', isSupportOfF_comp']
+  fun_prop
+
+@[simp, fun_prop]
+lemma equivariant_fst'
+    {f : X → Y × Z} (hf : Equivariant 𝔸 f)
+    : Equivariant 𝔸 (fun x ↦ (f x).1) := by
+  fun_prop
 
 @[simp, fun_prop]
 lemma isSupportedF_fst'
@@ -54,10 +75,19 @@ lemma isSupportOfF_snd
     : IsSupportOfF A (Prod.snd : X × Y → Y) := by
   simp only [isSupportOfF_def, Prod.forall, rename_mk, implies_true]
 
-@[simp, fun_prop]
+@[simp, local fun_prop]
+lemma equivariant_snd : Equivariant 𝔸 (Prod.snd : X × Y → Y) := by
+  simp only [equivariant_def, isSupportOfF_snd]
+
+@[simp, local fun_prop]
 lemma isSupportedF_snd : IsSupportedF 𝔸 (Prod.snd : X × Y → Y) := by
-  use ∅
-  simp only [isSupportOfF_snd, isSupportOfF_id', isSupportOfF_comp']
+  fun_prop
+
+@[simp, fun_prop]
+lemma equivariant_snd'
+    {f : X → Y × Z} (hf : Equivariant 𝔸 f)
+    : Equivariant 𝔸 (fun x ↦ (f x).2) := by
+  fun_prop
 
 @[simp, fun_prop]
 lemma isSupportedF_snd'
@@ -75,6 +105,13 @@ lemma isSupportOfF_mk
   grind
 
 @[simp, fun_prop]
+lemma equivariant_mk
+    {f : X → Y} (hf : Equivariant 𝔸 f)
+    {g : X → Z} (hg : Equivariant 𝔸 g)
+    : Equivariant 𝔸 (fun x ↦ (f x, g x)) := by
+  grind [equivariant_def]
+
+@[simp, fun_prop]
 lemma isSupportedF_mk
     {f : X → Y} (hf : IsSupportedF 𝔸 f)
     {g : X → Z} (hg : IsSupportedF 𝔸 g)
@@ -88,16 +125,10 @@ lemma isSupportedF_mk
 variable [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y]
 
 instance : RenamingSet 𝔸 (X × Y) where
-  exists_support x := by
+  isSupported x := by
     classical
     rcases x with ⟨x, y⟩
-    simp only [isSupportOf_mk]
-    obtain ⟨A, hA⟩ := exists_support 𝔸 x
-    obtain ⟨B, hB⟩ := exists_support 𝔸 y
-    use A ∪ B
-    apply And.intro
-    · apply isSupportOf_union_left hA
-    · apply isSupportOf_union_right hB
+    grind
 
 @[simp, grind =]
 lemma supp_mk [DecidableEq 𝔸] (x : X) (y : Y) : supp 𝔸 (x, y) = supp 𝔸 x ∪ supp 𝔸 y := by

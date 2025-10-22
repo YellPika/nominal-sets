@@ -29,9 +29,13 @@ lemma isSupportOf_empty [DecidableEq X] (A : Finset 𝔸) : IsSupportOf A (∅ :
     isSupportOf_def, Finset.ext_iff, mem_rename, Finset.notMem_empty,
     false_and, exists_false, implies_true]
 
+@[simp, grind ←]
+lemma isSupported_empty [DecidableEq X] : IsSupported 𝔸 (∅ : Finset X) := by
+  simp only [isSupported_def, isSupportOf_empty, exists_const]
+
 @[grind ←]
 lemma isSupportOf_insert [DecidableEq X]
-    (A : Finset 𝔸) (x : X) (xs : Finset X)
+    {A : Finset 𝔸} {x : X} {xs : Finset X}
     (hx : IsSupportOf A x) (hxs : IsSupportOf A xs)
     : IsSupportOf A (insert x xs) := by
   simp only [isSupportOf_def] at ⊢ hx hxs
@@ -41,6 +45,16 @@ lemma isSupportOf_insert [DecidableEq X]
   specialize hxs hfg
   simp only [Finset.ext_iff, mem_rename] at hxs
   simp only [mem_rename, Finset.mem_insert, exists_eq_or_imp, hx, hxs]
+
+lemma isSupported_insert [DecidableEq X]
+    {x : X} {xs : Finset X}
+    (hx : IsSupported 𝔸 x) (hxs : IsSupported 𝔸 xs)
+    : IsSupported 𝔸 (insert x xs) := by
+  classical
+  obtain ⟨A, hA⟩ := hx
+  obtain ⟨B, hB⟩ := hxs
+  use A ∪ B
+  apply isSupportOf_insert <;> grind
 
 lemma rename_mono
     [DecidableEq X] (σ : Ren 𝔸)
@@ -52,17 +66,11 @@ lemma rename_mono
 variable [RenamingSet 𝔸 X]
 
 instance [DecidableEq X] : RenamingSet 𝔸 (Finset X) where
-  exists_support xs := by
+  isSupported xs := by
     classical
     induction xs using Finset.induction with
-    | empty => simp only [isSupportOf_empty, exists_const]
-    | insert a s _ ih =>
-      obtain ⟨A, hA⟩ := exists_support 𝔸 a
-      obtain ⟨B, hB⟩ := ih
-      use A ∪ B
-      apply isSupportOf_insert
-      · apply isSupportOf_union_left hA
-      · apply isSupportOf_union_right hB
+    | empty => simp only [isSupported_empty]
+    | insert a s _ ih => apply isSupported_insert <;> grind
 
 @[simp, grind =]
 lemma supp_empty [DecidableEq X] : supp 𝔸 (∅ : Finset X) = ∅ := by

@@ -37,9 +37,9 @@ inductive IsSupportedF (f : X → Y) : Prop where
 variable (𝔸) in
 /-- A function `f : X → Y` is _equivariant_ if it preserves renamings. -/
 @[fun_prop]
-structure Equivariant (f : X → Y) : Prop where
+inductive Equivariant (f : X → Y) : Prop where
   /-- Renamings are preserved by `f`. -/
-  eq (σ : Ren 𝔸) x : rename σ (f x) = f (rename σ x)
+  | intro : IsSupportOfF (∅ : Finset 𝔸) f → Equivariant f
 
 /--
 A (nominal) _renaming set_ is a type with a renaming action such that every
@@ -47,14 +47,16 @@ element has a support.
 -/
 class RenamingSet (𝔸 X : Type*) [RenameAction 𝔸 X] where
   /-- Every element has a support. -/
-  exists_support (𝔸) (x : X) : ∃A : Finset 𝔸, IsSupportOf A x
+  isSupported (𝔸) (x : X) : IsSupported 𝔸 x
 
-export RenamingSet (exists_support)
+export RenamingSet (isSupported)
+
+attribute [grind ←, simp] isSupported
 
 /-- Every renaming set has a minimal support, denoted by `supp`. -/
 noncomputable def supp (𝔸) [RenameAction 𝔸 X] [RenamingSet 𝔸 X] (x : X) : Finset 𝔸 :=
   Set.Finite.toFinset (s := ⋂A, ⋂(_ : IsSupportOf A x), A.toSet) (by
-    obtain ⟨A, hA⟩ := exists_support 𝔸 x
+    obtain ⟨A, hA⟩ := isSupported 𝔸 x
     apply Set.Finite.subset
     · apply A.finite_toSet
     · apply Set.iInter_subset_of_subset A

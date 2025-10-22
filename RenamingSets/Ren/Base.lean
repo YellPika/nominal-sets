@@ -52,7 +52,7 @@ lemma base_idem' (A : Finset 𝔸) (σ : Ren 𝔸) : σ.base A * σ.base A = σ.
   simp only [mul_coe, base_idem]
 
 @[simp, grind =]
-lemma base_mem (A : Finset 𝔸) (σ : Ren 𝔸) (a : 𝔸) : σ.base A a ∈ A ↔ a ∈ A := by
+lemma base_of_mem (A : Finset 𝔸) (σ : Ren 𝔸) (a : 𝔸) : σ.base A a ∈ A ↔ a ∈ A := by
   by_cases ha : a ∈ A
   · have : ∃ b ∈ A, σ a = σ b := by use a
     simp only [base_def, mk_coe, ha, ↓reduceDIte, iff_true]

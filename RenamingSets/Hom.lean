@@ -10,9 +10,7 @@ structure Hom (𝔸 X Y : Type*) [RenameAction 𝔸 X] [RenameAction 𝔸 Y] whe
   /-- The underlying function. -/
   toFun : X → Y
   /-- The function has a finite support. -/
-  exists_support' : ∃ A : Finset 𝔸,
-    ∀ ⦃σ⦄, (∀a ∈ A, σ a = a) →
-    ∀ ⦃x⦄, rename σ (toFun x) = toFun (rename σ x)
+  isSupportedF' : IsSupportedF 𝔸 toFun := by fun_prop
 
 namespace Hom
 
@@ -26,24 +24,24 @@ instance : FunLike (Hom 𝔸 X Y) X Y where
 @[simp]
 lemma coe_mk (f : X → Y) (hf : _) (x : X) : mk (𝔸 := 𝔸) f hf x = f x := rfl
 
-lemma exists_support (f : Hom 𝔸 X Y) : ∃ A : Finset 𝔸,
-    ∀ ⦃σ⦄, (∀a ∈ A, σ a = a) →
-    ∀ ⦃x⦄, rename σ (f x) = f (rename σ x) := by
-  exact f.exists_support'
+@[simp]
+lemma isSupportedF_coe (f : Hom 𝔸 X Y) : IsSupportedF 𝔸 f :=
+  f.isSupportedF'
 
-lemma exists_support_subset
+private lemma supp_coe₀
     [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y] [Infinite 𝔸] [DecidableEq 𝔸]
-    (f : Hom 𝔸 X Y) (x)
-    : supp 𝔸 (f x) ⊆ f.exists_support.choose ∪ supp 𝔸 x := by
+    {A : Finset 𝔸} {f : Hom 𝔸 X Y} (hf : IsSupportOfF A f) (x)
+    : supp 𝔸 (f x) ⊆ A ∪ supp 𝔸 x := by
   classical
+  rcases hf with ⟨hf⟩
   intro a ha
   by_contra! ha'
-  obtain ⟨b, hb⟩ := (f.exists_support.choose ∪ {a}).exists_notMem
+  obtain ⟨b, hb⟩ := (A ∪ {a}).exists_notMem
   have hx : rename (Ren.restrict {a} fun _ ↦ b) x = x := by
     apply rename_congr'
     simp only [Ren.restrict_coe, Finset.mem_singleton, ite_eq_right_iff]
     grind
-  have := f.exists_support.choose_spec
+  have := hf
     (σ := .restrict {a} fun _ ↦ b)
     (by simp only [Ren.restrict_coe, Finset.mem_singleton, ite_eq_right_iff]
         grind)
@@ -67,8 +65,8 @@ lemma ext'
     {f g : Hom 𝔸 X Y} (A : Finset 𝔸)
     (hA : ∀ x, supp 𝔸 x ∩ A = ∅ → f x = g x)
     : f = g := by
-  obtain ⟨B, hB⟩ := f.exists_support
-  obtain ⟨C, hC⟩ := g.exists_support
+  obtain ⟨B, ⟨hB⟩⟩ := f.isSupportedF_coe
+  obtain ⟨C, ⟨hC⟩⟩ := g.isSupportedF_coe
   ext x
   let D := supp 𝔸 x ∪ B ∪ C ∪ A
   have : rename (.unfresh (supp 𝔸 x) D * .fresh (supp 𝔸 x) D) x = x := by
@@ -89,14 +87,11 @@ lemma ext'
   · grind
   · grind
 
-variable [DecidableEq 𝔸] [Infinite 𝔸] [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y]
+variable [DecidableEq 𝔸] [Infinite 𝔸] [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y] [RenamingSet 𝔸 Z]
 
 /-- Every `PartialHom` can be uniquely extended to a compatible `Hom`. -/
 noncomputable irreducible_def extend {A : Finset 𝔸} (f : PartialHom A X Y) : Hom 𝔸 X Y where
   toFun x := f.extend x
-  exists_support' := by
-    use A
-    grind
 
 @[simp, grind =]
 lemma extend_eq
@@ -106,23 +101,37 @@ lemma extend_eq
 
 @[simps]
 private def rename₀
-    (σ : Ren 𝔸) (f : Hom 𝔸 X Y)
-    : PartialHom (f.exists_support.choose ∪ σ.supp ∪ f.exists_support.choose.image σ) X Y where
+    (σ : Ren 𝔸) {A : Finset 𝔸} {f : Hom 𝔸 X Y} (hf : IsSupportOfF A f)
+    : PartialHom (A ∪ σ.supp ∪ A.image σ) X Y where
   toFun x := rename σ (f x)
   supported' σ' hσ' x hx₁ hx₂ := by
     dsimp only
+
+    replace hx₁ : ∀ a ∈ supp 𝔸 x, a ∉ A ∧ a ∉ σ.supp ∧ a ∉ A.image σ := by
+      simp only [
+        Finset.union_assoc, Finset.ext_iff, Finset.mem_inter, Finset.mem_union,
+        Finset.notMem_empty, iff_false, not_and, not_or] at hx₁
+      exact hx₁
+
+    replace hx₂ : ∀ a ∈ supp 𝔸 (rename σ' x), a ∉ A ∧ a ∉ σ.supp ∧ a ∉ A.image σ := by
+      simp only [
+        Finset.union_assoc, Finset.ext_iff, Finset.mem_inter, Finset.mem_union,
+        Finset.notMem_empty, iff_false, not_and, not_or] at hx₂
+      exact hx₂
 
     let μ : Ren 𝔸 := .base (supp 𝔸 x) σ'
 
     have lemma₁ : rename σ' x = rename σ' (rename μ x) := by
       simp only [rename_mul]
       apply rename_congr
-      grind
+      simp only [Ren.mul_base, implies_true, μ]
     rw [lemma₁]
 
     have lemma₂ : f (rename σ' (rename μ x)) = rename σ' (f (rename μ x)) := by
-      rw [f.exists_support.choose_spec]
-      grind
+      rw [hf.eq]
+      intro a ha
+      apply hσ'
+      simp only [Finset.union_assoc, Finset.mem_union, ha, Finset.mem_image, true_or]
     rw [lemma₂]
 
     have lemma₃
@@ -132,10 +141,11 @@ private def rename₀
       apply rename_congr
       intro a ha
       simp only [Ren.mul_coe]
-      have := exists_support_subset f _ ha
+      have := supp_coe₀ hf _ ha
       simp only [Finset.mem_union] at this
       cases this with
-      | inl this => grind
+      | inl this =>
+        rw [hσ', hσ'] <;> grind
       | inr this =>
         have h₁ : σ' a ∈ supp 𝔸 (rename σ' x) := by
           rw [lemma₁, supp_rename]
@@ -144,46 +154,43 @@ private def rename₀
           · intro b hb c hc hbc
             rcases supp_rename_subset' _ _ _ hb with ⟨b, hb', rfl⟩
             rcases supp_rename_subset' _ _ _ hc with ⟨c, hc', rfl⟩
-            grind [= Ren.restrict_coe]
+            simpa only [hb', hc', Ren.base_eq_iff, Ren.coe_base, μ] using hbc
         have h₂ : a ∈ supp 𝔸 x := by
           rcases supp_rename_subset' _ _ _ this with ⟨a, ha', rfl⟩
-          grind
-        have h₃ : σ (σ' a) = σ' a ∧ σ a = a := by
-          simp only [
-            Finset.union_assoc, Finset.ext_iff, Finset.mem_inter,
-            Finset.mem_union, Ren.mem_supp] at hx₁ hx₂
-          grind
-        simp only [h₃]
+          simp only [Ren.base_of_mem, ha', μ]
+        have h₃ : σ (σ' a) = σ' a := by
+          have h : σ' a ∉ σ.supp := by grind
+          simpa only [Ren.mem_supp, ne_eq, Decidable.not_not] using h
+        have h₄ : σ a = a := by
+          have h : a ∉ σ.supp := by grind
+          simpa only [Ren.mem_supp, ne_eq, Decidable.not_not] using h
+        simp only [h₃, h₄]
     rw [lemma₃]
 
     have lemma₄ : f (rename μ x) = rename μ (f x) := by
-      rw [f.exists_support.choose_spec]
-      simp only [Finset.ext_iff, Finset.mem_inter] at hx₁
-      grind
+      rw [hf.eq]
+      intro a ha
+      have h : a ∉ supp 𝔸 x := by grind
+      simp only [h, not_false_eq_true, Ren.base_of_notMem, μ]
     rw [lemma₄]
 
     have lemma₅ : rename σ (rename μ (f x)) = rename μ (rename σ (f x)) := by
       simp only [rename_mul]
       apply rename_congr
       intro a ha
-      replace ha := exists_support_subset f _ ha
+      replace ha := supp_coe₀ hf _ ha
       simp only [Finset.mem_union] at ha
       cases ha with
       | inl ha =>
         simp only [Ren.mul_coe]
-        have : a ∉ supp 𝔸 x := by
-          simp only [Finset.ext_iff, Finset.mem_inter] at hx₁
-          grind
-        have : σ a ∉ supp 𝔸 x := by
-          simp only [Finset.ext_iff, Finset.mem_inter] at hx₁
-          grind
-        grind
+        have h₁ : a ∉ supp 𝔸 x := by grind
+        have h₂ : σ a ∉ supp 𝔸 x := by grind
+        simp only [h₁, not_false_eq_true, Ren.base_of_notMem, h₂, μ]
       | inr ha =>
         have : σ a = a ∧ σ (μ a) = μ a := by
-          simp only [
-            Finset.union_assoc, Finset.ext_iff, Finset.mem_inter,
-            Finset.mem_union, Ren.mem_supp] at hx₁
-          grind
+          simp only [Ren.mem_supp, ne_eq, Decidable.not_not] at hx₁
+          have : μ a ∈ supp 𝔸 x := by grind
+          simp only [ha, hx₁, this, and_self]
         simp only [Ren.mul_coe, this]
     rw [lemma₅]
 
@@ -191,10 +198,10 @@ private def rename₀
 
 @[simps -isSimp]
 noncomputable instance : RenameAction 𝔸 (Hom 𝔸 X Y) where
-  rename σ f := extend (rename₀ σ f)
+  rename σ f := extend (rename₀ σ f.isSupportedF_coe.choose_spec)
 
   rename_one f := by
-    apply ext' f.exists_support.choose
+    apply ext' f.isSupportedF_coe.choose
     intro x hx
     rw [extend_eq]
     · simp only [rename₀_toFun, rename_one', id_eq]
@@ -207,11 +214,11 @@ noncomputable instance : RenameAction 𝔸 (Hom 𝔸 X Y) where
 
   rename_mul σ₁ σ₂ f := by
     apply ext' <|
-      (extend (rename₀ σ₂ f)).exists_support.choose ∪
-      (extend (rename₀ σ₂ f)).exists_support.choose.image σ₁ ∪
-      f.exists_support.choose ∪
-      f.exists_support.choose.image (σ₁ * σ₂) ∪
-      f.exists_support.choose.image σ₂ ∪
+      (extend (rename₀ σ₂ f.isSupportedF_coe.choose_spec)).isSupportedF_coe.choose ∪
+      (extend (rename₀ σ₂ f.isSupportedF_coe.choose_spec)).isSupportedF_coe.choose.image σ₁ ∪
+      f.isSupportedF_coe.choose ∪
+      f.isSupportedF_coe.choose.image (σ₁ * σ₂) ∪
+      f.isSupportedF_coe.choose.image σ₂ ∪
       σ₁.supp ∪
       σ₂.supp ∪
       (σ₁ * σ₂).supp
@@ -238,23 +245,23 @@ noncomputable instance : RenameAction 𝔸 (Hom 𝔸 X Y) where
       grind
 
 instance : RenamingSet 𝔸 (Hom 𝔸 X Y) where
-  exists_support f := by
+  isSupported f := by
     classical
-    use f.exists_support.choose
+    use f.isSupportedF_coe.choose
     simp only [isSupportOf_def, rename_def]
     intro σ₁ σ₂ hσ
     apply ext' <|
-      f.exists_support.choose
+      f.isSupportedF_coe.choose
         ∪ σ₁.supp
         ∪ σ₂.supp
-        ∪ f.exists_support.choose.image σ₁
-        ∪ f.exists_support.choose.image σ₂
+        ∪ f.isSupportedF_coe.choose.image σ₁
+        ∪ f.isSupportedF_coe.choose.image σ₂
     intro x hx
     rw [extend_eq, extend_eq]
     · dsimp only [rename₀_toFun]
       apply rename_congr
       intro a ha
-      replace ha := exists_support_subset f _ ha
+      replace ha := supp_coe₀ f.isSupportedF_coe.choose_spec _ ha
       simp only [Finset.mem_union] at ha
       cases ha with
       | inl h => exact hσ _ h
@@ -274,12 +281,12 @@ lemma rename_apply
     : rename σ f (rename σ x) = rename σ (f x) := by
   classical
   generalize hA
-    : f.exists_support.choose
-        ∪ (rename σ f).exists_support.choose
+    : f.isSupportedF_coe.choose
+        ∪ (rename σ f).isSupportedF_coe.choose
         ∪ σ.supp
         ∪ supp 𝔸 x
         ∪ (supp 𝔸 x).image σ
-        ∪ f.exists_support.choose.image σ
+        ∪ f.isSupportedF_coe.choose.image σ
     = A
   let τ := Ren.fresh A A
   have : ∀a ∈ A, σ (τ a) = τ a := by
@@ -307,7 +314,7 @@ lemma rename_apply
   have : ∀a ∈ supp 𝔸 (f (rename τ x)), (τₜ * σ' * σ) a = (σ * τₜ) a := by
     intro a ha
     simp only [Ren.mul_coe, π_coe, σ']
-    replace ha := exists_support_subset f _ ha
+    replace ha := supp_coe₀ f.isSupportedF_coe.choose_spec _ ha
     simp only [Finset.mem_union] at ha
     cases ha with
     | inl ha =>
@@ -329,7 +336,7 @@ lemma rename_apply
       have h₅ : σ a ∈ A := by grind
       have h₆ : τₜ (τ (σ a)) = (σ a) := by grind
       simp only [h₁, h₂, ↓reduceIte, h₃, h₄, h₅, h₆]
-  have : ∀a ∈ (rename σ f).exists_support.choose, (τₜ * σ') a = a := by
+  have : ∀a ∈ (rename σ f).isSupportedF_coe.choose, (τₜ * σ') a = a := by
     intro a ha
     have h₁ : a ∈ A := by grind
     have h₂ : σ (τ a) = τ a := by grind
@@ -344,7 +351,7 @@ lemma rename_apply
   have : (rename σ f) (rename (τₜ * σ') (rename τ x))
        = rename (τₜ * σ') (rename σ f (rename τ x)) := by
     simp only [rename_mul]
-    rw [(rename σ f).exists_support.choose_spec (by grind)]
+    rw [(rename σ f).isSupportedF_coe.choose_spec.eq (by grind)]
     simp only [rename_mul]
   have : rename σ f (rename τ x) = rename σ (f (rename τ x)) := by
     simp only [rename_def]
@@ -368,7 +375,7 @@ lemma rename_apply
     apply rename_congr
     grind
   have : rename (σ * τₜ) (f (rename τ x)) = rename σ (f (rename τₜ (rename τ x))) := by
-    nth_rw 2 [←f.exists_support.choose_spec]
+    nth_rw 2 [←f.isSupportedF_coe.choose_spec.eq]
     · simp only [rename_mul]
     · grind
   have : rename τₜ (rename τ x) = x := by
@@ -429,56 +436,72 @@ lemma supp_subset
   simp only [Ren.restrict_coe, Finset.mem_singleton] at ha
   grind
 
-@[simps]
-private def curry₀
-    [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y] [RenamingSet 𝔸 Z]
-    (f : Hom 𝔸 (X × Y) Z) (x : X)
-    : Hom 𝔸 Y Z where
-  toFun y := f (x, y)
-  exists_support' := by
-    use supp 𝔸 f ∪ supp 𝔸 x
-    intro σ hσ y
-    simp only [← rename_apply, Prod.rename_mk]
-    rw [rename_congr', rename_congr']
-    · grind
-    · grind
+@[simp]
+lemma equivariant_coe : Equivariant 𝔸 (fun ((f, x) : Hom 𝔸 X Y × X) ↦ f x) := by
+  simp only [
+    equivariant_def, isSupportOfF_def, Finset.notMem_empty, IsEmpty.forall_iff,
+    implies_true, Prod.forall, Prod.rename_mk, rename_apply]
+
+@[simp]
+lemma isSupportedF_coe' : IsSupportedF 𝔸 (fun ((f, x) : Hom 𝔸 X Y × X) ↦ f x) := by
+  apply isSupportedF_of_equivariant
+  simp only [equivariant_coe]
+
+omit [RenamingSet 𝔸 X] in
+@[fun_prop, simp]
+lemma equivariant_coe'
+    {f : X → Hom 𝔸 Y Z} (hf : Equivariant 𝔸 f)
+    {g : X → Y} (hg : Equivariant 𝔸 g)
+    : Equivariant 𝔸 (fun x ↦ f x (g x)) := by
+  have := equivariant_comp' (𝔸 := 𝔸)
+    (f := fun ((f, x) : Hom 𝔸 Y Z × Y) ↦ f x)
+    (g := fun x ↦ (f x, g x))
+  simp only [equivariant_coe, forall_const] at this
+  apply this
+  fun_prop
+
+omit [RenamingSet 𝔸 X] in
+@[fun_prop, simp]
+lemma isSupportedF_coe''
+    {f : X → Hom 𝔸 Y Z} (hf : IsSupportedF 𝔸 f)
+    {g : X → Y} (hg : IsSupportedF 𝔸 g)
+    : IsSupportedF 𝔸 (fun x ↦ f x (g x)) := by
+  have := isSupportedF_comp' (𝔸 := 𝔸)
+    (f := fun ((f, x) : Hom 𝔸 Y Z × Y) ↦ f x)
+    (g := fun x ↦ (f x, g x))
+  simp only [isSupportedF_coe', forall_const] at this
+  apply this
+  fun_prop
+
+@[fun_prop]
+lemma isSupportedF_mk
+    (f : X → Y → Z) (hf : IsSupportedF 𝔸 fun (x, y) ↦ f x y)
+    : IsSupportedF 𝔸 (fun x ↦ mk (f x)) := by
+  obtain ⟨A, hA⟩ := hf
+  use A
+  simp only [isSupportOfF_def, Prod.forall, Prod.rename_mk] at ⊢ hA
+  intro σ hσ x
+  apply ext' (supp 𝔸 x ∪ A ∪ σ.supp)
+  intro y hy
+  have : rename σ y = y := by
+    apply rename_congr'
+    simp only [Finset.union_assoc, Finset.ext_iff, Finset.mem_inter, Finset.mem_union,
+      Ren.mem_supp, ne_eq, Finset.notMem_empty, iff_false, not_and, not_or,
+      Decidable.not_not] at hy
+    grind
+  rw [←this, rename_apply]
+  simp only [coe_mk]
+  apply hA hσ
 
 /-- Currying for morphisms. -/
-@[simps!]
-def curry
-    [Infinite 𝔸] [DecidableEq 𝔸]
-    [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y] [RenamingSet 𝔸 Z]
-    (f : Hom 𝔸 (X × Y) Z)
-    : Hom 𝔸 X (Hom 𝔸 Y Z) where
-  toFun := curry₀ f
-  exists_support' := by
-    use supp 𝔸 f
-    intro σ hσ x
-    apply ext' (supp 𝔸 x ∪ supp 𝔸 f ∪ σ.supp)
-    intro y hy
-    simp only [curry₀_toFun]
-    have : rename σ y = y := by
-      apply rename_congr'
-      simp only [Finset.union_assoc, Finset.ext_iff, Finset.mem_inter, Finset.mem_union,
-        Ren.mem_supp, ne_eq, Finset.notMem_empty, iff_false, not_and, not_or,
-        Decidable.not_not] at hy
-      grind
-    rw [←this, rename_apply]
-    simp only [curry₀_toFun, ← rename_apply, Prod.rename_mk]
-    rw [rename_congr']
-    grind
+@[simps]
+def curry (f : Hom 𝔸 (X × Y) Z) : Hom 𝔸 X (Hom 𝔸 Y Z) where
+  toFun x := { toFun y := f (x, y) }
 
 /-- The evaluation morphism. -/
 @[simps]
-def eval
-    [Infinite 𝔸] [DecidableEq 𝔸]
-    [RenamingSet 𝔸 X] [RenamingSet 𝔸 Y] [RenamingSet 𝔸 Z]
-    : Hom 𝔸 (Hom 𝔸 X Y × X) Y where
+def eval : Hom 𝔸 (Hom 𝔸 X Y × X) Y where
   toFun x := x.1 x.2
-  exists_support' := by
-    use ∅
-    intro σ hσ x
-    simp only [rename_apply, Prod.rename_def]
 
 end Hom
 

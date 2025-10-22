@@ -118,7 +118,29 @@ lemma isSupportOfF_comp'
   simp only [isSupportOfF_def] at ⊢ hf hg
   grind
 
+/-! ## `IsSupported` -/
+
+lemma isSupported_def (x : X) : IsSupported 𝔸 x ↔ ∃A : Finset 𝔸, IsSupportOf A x := by
+  apply Iff.intro <;>
+  · intro ⟨A, hA⟩
+    exact ⟨A, hA⟩
+
 /-! ## `IsSupportedF` -/
+
+lemma isSupportedF_def (f : X → Y) : IsSupportedF 𝔸 f ↔ ∃A : Finset 𝔸, IsSupportOfF A f := by
+  apply Iff.intro <;>
+  · intro ⟨A, hA⟩
+    exact ⟨A, hA⟩
+
+/--
+Assuming `IsSupportedF 𝔸 f`, we can obtain some `A : Finset 𝔸` such that
+`IsSupportOfF A f`.
+-/
+noncomputable def IsSupportedF.choose {f : X → Y} (hf : IsSupportedF 𝔸 f) : Finset 𝔸 :=
+  ((isSupportedF_def f).mp hf).choose
+
+lemma IsSupportedF.choose_spec {f : X → Y} (hf : IsSupportedF 𝔸 f) : IsSupportOfF hf.choose f :=
+  ((isSupportedF_def f).mp hf).choose_spec
 
 @[simp, fun_prop]
 lemma isSupportedF_id : IsSupportedF 𝔸 (id : X → X) := by
@@ -148,35 +170,50 @@ lemma isSupportedF_comp'
     : IsSupportedF 𝔸 fun x ↦ f (g x) := by
   fun_prop
 
+@[simp, fun_prop]
+lemma isSupportedF_const [RenamingSet 𝔸 Y] (y : Y) : IsSupportedF 𝔸 fun _ : X ↦ y := by
+  have ⟨A, ⟨hA⟩⟩ := isSupported 𝔸 y
+  use A
+  simp only [isSupportOfF_def]
+  intro σ hσ _
+  nth_rw 2 [← rename_one (𝔸 := 𝔸) y]
+  apply hA hσ
+
 /-- ## `Equivariant` -/
 
 lemma equivariant_def (f : X → Y)
-    : Equivariant 𝔸 f ↔ ∀ (σ : Ren 𝔸) x, rename σ (f x) = f (rename σ x) := by
+    : Equivariant 𝔸 f ↔ IsSupportOfF (∅ : Finset 𝔸) f := by
   apply Iff.intro
-  · apply Equivariant.eq
-  · apply Equivariant.mk
+  · rintro ⟨h⟩
+    exact h
+  · intro h
+    exact ⟨h⟩
 
 @[simp, fun_prop]
 lemma equivariant_id : Equivariant 𝔸 (id : X → X) := by
-  simp only [equivariant_def, id_eq, implies_true]
+  simp only [equivariant_def, isSupportOfF_id]
 
 @[simp, fun_prop]
 lemma equivariant_id' : Equivariant 𝔸 (fun x : X ↦ x) := by
-  simp only [equivariant_def, implies_true]
+  simp only [equivariant_def, isSupportOfF_id']
 
 @[simp, fun_prop]
 lemma equivariant_comp
     {f : Y → Z} (hf : Equivariant 𝔸 f)
     {g : X → Y} (hg : Equivariant 𝔸 g)
     : Equivariant 𝔸 (f ∘ g) := by
-  simp_all only [equivariant_def, Function.comp_apply, implies_true]
+  simp_all only [equivariant_def, isSupportOfF_comp]
 
 @[simp, fun_prop]
 lemma equivariant_comp'
     {f : Y → Z} (hf : Equivariant 𝔸 f)
     {g : X → Y} (hg : Equivariant 𝔸 g)
     : Equivariant 𝔸 (fun x ↦ f (g x)) := by
-  simp_all only [equivariant_def, implies_true]
+  simp_all only [equivariant_def, isSupportOfF_comp']
+
+@[fun_prop, grind →, grind ←]
+lemma isSupportedF_of_equivariant {f : X → Y} (hf : Equivariant 𝔸 f) : IsSupportedF 𝔸 f := by
+  grind [equivariant_def, isSupportedF_def]
 
 /-! ## `supp` -/
 
@@ -197,7 +234,7 @@ lemma isSupportOf_supp
     (𝔸) [RenameAction 𝔸 X] [RenamingSet 𝔸 X] [Infinite 𝔸] (x : X)
     : IsSupportOf (supp 𝔸 x) x := by
   classical
-  obtain ⟨A, hA⟩ := exists_support 𝔸 x
+  obtain ⟨A, hA⟩ := isSupported 𝔸 x
 
   have : Std.Commutative (· ∩ · : Finset 𝔸 → Finset 𝔸 → Finset 𝔸) := by
     constructor
