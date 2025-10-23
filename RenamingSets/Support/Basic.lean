@@ -64,6 +64,22 @@ lemma isSupportOf_union_right
 lemma isSupportOf_discrete [DiscreteRenameAction 𝔸 X] (A : Finset 𝔸) (x : X) : IsSupportOf A x := by
   simp only [isSupportOf_def, rename_discrete', id_eq, implies_true]
 
+@[simp]
+lemma isSupportOf_atom [Infinite 𝔸] (A : Finset 𝔸) (a : 𝔸) : IsSupportOf A a ↔ a ∈ A := by
+  classical
+  simp only [isSupportOf_def, RenameAction.rename_def]
+  apply Iff.intro
+  · intro h
+    by_contra ha
+    obtain ⟨b, hb⟩ := ({a} : Finset 𝔸).exists_notMem
+    specialize @h (.assign a b) 1
+    simp only [
+      Ren.restrict_coe, Finset.mem_singleton,
+      Ren.one_coe, ite_eq_right_iff, ↓reduceIte] at h
+    grind
+  · intro ha f g h
+    apply h a ha
+
 /-! ## `IsSupportOfF` -/
 
 lemma isSupportOfF_def
@@ -133,6 +149,13 @@ lemma isSupported_def (x : X) : IsSupported 𝔸 x ↔ ∃A : Finset 𝔸, IsSup
 lemma isSupported_discrete [DiscreteRenameAction 𝔸 X] (x : X) : IsSupported 𝔸 x := by
   use ∅
   simp only [isSupportOf_discrete]
+
+@[simp]
+lemma isSupported_atom (a : 𝔸) : IsSupported 𝔸 a := by
+  use {a}
+  simp only [
+    isSupportOf_def, Finset.mem_singleton, forall_eq,
+    RenameAction.rename_def, imp_self, implies_true]
 
 /-! ## `IsSupportedF` -/
 
@@ -231,6 +254,9 @@ instance : RenamingSet[(default : RenameAction 𝔸 X)] := by
   constructor
   simp only [isSupported_discrete, implies_true]
 
+instance : RenamingSet 𝔸 𝔸 where
+  isSupported a := by simp only [isSupported_atom]
+
 /-! ## `supp` -/
 
 variable [RenamingSet 𝔸 X]
@@ -315,5 +341,19 @@ lemma rename_congr'
   nth_rw 2 [← rename_one (𝔸 := 𝔸) x]
   apply rename_congr
   exact h
+
+@[simp]
+lemma supp_atom [Infinite 𝔸] (a) : supp 𝔸 a = {a} := by
+  classical
+  ext b
+  simp only [mem_supp, Finset.mem_singleton]
+  apply Iff.intro
+  · intro h
+    simp only [isSupportOf_atom] at h
+    specialize h {a}
+    grind
+  · rintro rfl A hA
+    simp only [isSupportOf_atom] at hA
+    exact hA
 
 end RenamingSets

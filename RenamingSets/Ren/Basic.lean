@@ -11,7 +11,10 @@ variable {𝔸 : Type*}
 namespace RenamingSets.Ren
 
 @[simp]
-lemma mk_coe (σ : 𝔸 → 𝔸) (hσ a) : mk σ hσ a = σ a := rfl
+lemma mk_coe (σ : 𝔸 → 𝔸) (hσ) : mk σ hσ = σ := rfl
+
+@[simp]
+lemma coe_mk (σ : Ren 𝔸) : mk σ σ.exists_support' = σ := rfl
 
 lemma exists_support (ρ : Ren 𝔸) : ∃A : Finset 𝔸, ∀a ∉ A, ρ a = a :=
   ρ.exists_support'
