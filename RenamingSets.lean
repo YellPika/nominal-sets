@@ -1,5 +1,15 @@
-import RenamingSets.Basic
-import RenamingSets.Defs
 import RenamingSets.Finset
+import RenamingSets.Function
 import RenamingSets.Hom
+import RenamingSets.PartialHom
 import RenamingSets.Prod
+import RenamingSets.Ren.Base
+import RenamingSets.Ren.Basic
+import RenamingSets.Ren.Defs
+import RenamingSets.Ren.Fresh
+import RenamingSets.Ren.Transfer
+import RenamingSets.RenameAction.Basic
+import RenamingSets.RenameAction.Defs
+import RenamingSets.Sum
+import RenamingSets.Support.Basic
+import RenamingSets.Support.Defs
