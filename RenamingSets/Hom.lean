@@ -122,32 +122,32 @@ lemma supp_subset [DecidableEq 𝔸]
   simp only [isSupportOfF_supp]
 
 @[simp]
-lemma equivariant_coe : Equivariant 𝔸 (fun ((f, x) : Hom 𝔸 X Y × X) ↦ f x) := by
+lemma equivariant_apply : Equivariant 𝔸 (fun x : Hom 𝔸 X Y × X ↦ x.1 x.2) := by
   simp only [
     equivariant_def, isSupportOfF_def, Finset.notMem_empty, IsEmpty.forall_iff,
     implies_true, Prod.forall, Prod.rename_mk, rename_apply]
 
 @[simp]
-lemma isSupportedF_apply : IsSupportedF 𝔸 (fun ((f, x) : Hom 𝔸 X Y × X) ↦ f x) := by
+lemma isSupportedF_apply : IsSupportedF 𝔸 (fun x : Hom 𝔸 X Y × X ↦ x.1 x.2) := by
   apply isSupportedF_of_equivariant
-  simp only [equivariant_coe]
+  simp only [equivariant_apply]
 
 omit [RenamingSet 𝔸 X] in
 @[fun_prop, simp]
-lemma equivariant_coe'
+lemma equivariant_apply'
     {f : X → Hom 𝔸 Y Z} (hf : Equivariant 𝔸 f)
     {g : X → Y} (hg : Equivariant 𝔸 g)
     : Equivariant 𝔸 (fun x ↦ f x (g x)) := by
   have := equivariant_comp' (𝔸 := 𝔸)
     (f := fun ((f, x) : Hom 𝔸 Y Z × Y) ↦ f x)
     (g := fun x ↦ (f x, g x))
-  simp only [equivariant_coe, forall_const] at this
+  simp only [equivariant_apply, forall_const] at this
   apply this
   fun_prop
 
 omit [RenamingSet 𝔸 X] in
 @[fun_prop, simp]
-lemma isSupportedF''
+lemma isSupportedF_apply'
     {f : X → Hom 𝔸 Y Z} (hf : IsSupportedF 𝔸 f)
     {g : X → Y} (hg : IsSupportedF 𝔸 g)
     : IsSupportedF 𝔸 (fun x ↦ f x (g x)) := by
