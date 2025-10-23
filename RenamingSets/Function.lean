@@ -293,7 +293,7 @@ lemma rename_apply' (σ : Ren 𝔸) {f : X → Y} (hf : ¬ IsSupportedF 𝔸 f) 
   ext x
   simp only [rename_def, hf, ↓reduceDIte]
 
-@[simp]
+@[simp, grind ←, grind →]
 lemma isSupportOf_of_isSupportOfF
     (A : Finset 𝔸) (f : X → Y) (hf : IsSupportOfF A f)
     : IsSupportOf A f := by

@@ -16,7 +16,12 @@ structure IsSupportOf (A : Finset 𝔸) (x : X) where
   /-- Applying any two renamings behaves identically as long as the renamings agree on `A`. -/
   eq ⦃f g⦄ : (∀a ∈ A, f a = g a) → rename f x = rename g x
 
-/-- An alternative formulation of support for functions. -/
+/--
+An alternative formulation of support for functions.
+
+NOTE: `IsSupportOfF` is actually only equivalent to `IsSupportOf` when the
+function in question satisfies `IsSupportedF`.
+-/
 structure IsSupportOfF (A : Finset 𝔸) (f : X → Y) where
   /-- Any renaming which does not touch the support commutes with the function. -/
   eq ⦃σ : Ren 𝔸⦄ : (∀a ∈ A, σ a = a) → ∀x, rename σ (f x) = f (rename σ x)
@@ -28,7 +33,11 @@ inductive IsSupported (x : X) : Prop where
   | intro (A : Finset 𝔸) : IsSupportOf A x → IsSupported x
 
 variable (𝔸) in
-/-- An alternative formulation of supportedness for functions. -/
+/--
+An alternative formulation of supportedness for functions.
+
+NOTE: This is actually a stronger condition that `IsSupported`.
+-/
 @[fun_prop]
 inductive IsSupportedF (f : X → Y) : Prop where
   /-- Any renaming which does not touch the support commutes with the function. -/
