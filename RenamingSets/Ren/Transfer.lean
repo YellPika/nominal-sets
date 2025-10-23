@@ -4,6 +4,11 @@ namespace RenamingSets.Ren
 
 variable {𝔸 : Type*}
 
+/--
+`transfer A σ₁ σ₂` maps the outputs of `σ₁` on `A` to the outputs of `σ₂` on
+`A`, i.e., `transfer A σ₁ σ₂ (σ₁ a) = σ₂ a` (provided `a ∈ A` and `σ₁` is
+injective on `A`.)
+-/
 noncomputable irreducible_def transfer (A : Finset 𝔸) (σ₁ σ₂ : Ren 𝔸) : Ren 𝔸 where
   toFun a :=
     open Classical in
