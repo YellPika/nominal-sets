@@ -90,8 +90,8 @@ lemma supp_rename_subset
   constructor
   intro f g hfg
   simp only [
-    Finset.mem_rename, rename_def,
-    forall_exists_index, and_imp, forall_apply_eq_imp_iff₂] at hfg
+    Finset.mem_rename, RenameAction.rename_def, forall_exists_index,
+    and_imp, forall_apply_eq_imp_iff₂] at hfg
   simp only [rename_mul]
   apply rename_congr
   simp only [Ren.mul_coe]
@@ -102,7 +102,7 @@ lemma supp_rename_subset'
     : ∀ a ∈ supp 𝔸 (rename σ x), ∃ b ∈ supp 𝔸 x, σ b = a := by
   intro a ha
   have := supp_rename_subset _ _ ha
-  simp only [Finset.mem_rename, rename_def] at this
+  simp only [Finset.mem_rename, RenameAction.rename_def] at this
   exact this
 
 @[simp, grind =]
@@ -113,7 +113,7 @@ lemma supp_rename
   apply le_antisymm
   · simp only [Finset.le_eq_subset, supp_rename_subset]
   · intro a ha
-    simp only [Finset.mem_rename, rename_def] at ha
+    simp only [Finset.mem_rename, RenameAction.rename_def] at ha
     rcases ha with ⟨b, hb, rfl⟩
 
     let σ' : Ren 𝔸 := {
@@ -141,11 +141,11 @@ lemma supp_rename
     rw [←this] at hb
 
     have := supp_rename_subset _ _ hb
-    simp only [Finset.mem_rename, rename_def] at this
+    simp only [Finset.mem_rename, RenameAction.rename_def] at this
     rcases this with ⟨c, hc, rfl⟩
 
     have := supp_rename_subset _ _ hc
-    simp only [Finset.mem_rename, rename_def] at this
+    simp only [Finset.mem_rename, RenameAction.rename_def] at this
     rcases this with ⟨d, hd, rfl⟩
 
     have : ∃ b ∈ supp 𝔸 x, σ d = σ b := by grind
@@ -172,7 +172,9 @@ lemma isSupportOf_def'
     have : a ∉ supp 𝔸 (rename (.restrict {a} fun _ ↦ b) x) := by
       intro ha
       replace ha := supp_rename_subset _ _ ha
-      simp only [Finset.mem_rename, rename_def, Ren.restrict_coe, Finset.mem_singleton] at ha
+      simp only [
+        Finset.mem_rename, RenameAction.rename_def,
+        Ren.restrict_coe, Finset.mem_singleton] at ha
       grind
 
     specialize @h (.restrict {a} fun _ ↦ b)

@@ -60,6 +60,9 @@ class RenamingSet (𝔸 X : Type*) [RenameAction 𝔸 X] where
 
 export RenamingSet (isSupported)
 
+@[inherit_doc RenamingSet]
+scoped notation "RenamingSet[" inst "]" => @RenamingSet _ _ inst
+
 attribute [grind ←, simp] isSupported
 
 /-- Every renaming set has a minimal support, denoted by `supp`. -/

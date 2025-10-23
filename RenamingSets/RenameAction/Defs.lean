@@ -17,6 +17,8 @@ attribute [simp] rename_mul
 
 variable {𝔸 X Y Z : Type*} [RenameAction 𝔸 X] [RenameAction 𝔸 Y] [RenameAction 𝔸 Z]
 
+namespace RenameAction
+
 @[simps]
 instance : Inhabited (RenameAction 𝔸 X) where
   default := {
@@ -30,5 +32,39 @@ instance (priority := default) : RenameAction 𝔸 𝔸 where
   rename σ := σ
   rename_one := by simp only [Ren.one_coe, implies_true]
   rename_mul := by simp only [Ren.mul_coe, implies_true]
+
+end RenameAction
+
+namespace Bool
+instance : RenameAction 𝔸 Bool := default
+end Bool
+
+namespace Empty
+instance : RenameAction 𝔸 Empty := default
+end Empty
+
+namespace PEmpty
+instance : RenameAction 𝔸 PEmpty := default
+end PEmpty
+
+namespace Unit
+instance : RenameAction 𝔸 Unit := default
+end Unit
+
+namespace PUnit
+instance : RenameAction 𝔸 PUnit := default
+end PUnit
+
+/--
+A type with a _discrete renaming action_ has a renaming action such that:
+-/
+class DiscreteRenameAction (𝔸 X : Type*) [RenameAction 𝔸 X] : Prop where
+  /-- The renaming action does nothing. -/
+  rename_discrete (σ : Ren 𝔸) (x : X) : rename σ x = x
+
+export DiscreteRenameAction (rename_discrete)
+
+@[inherit_doc DiscreteRenameAction]
+scoped notation "DiscreteRenameAction[" inst "]" => @DiscreteRenameAction _ _ inst
 
 end RenamingSets

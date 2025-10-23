@@ -28,7 +28,7 @@ lemma ext'
     ext a
     simp only [
       Ren.fresh_injOn, supp_rename, Finset.mem_inter,
-      Finset.mem_rename, rename_def, Finset.notMem_empty,
+      Finset.mem_rename, RenameAction.rename_def, Finset.notMem_empty,
       iff_false, not_and, forall_exists_index, and_imp]
     grind
   · grind

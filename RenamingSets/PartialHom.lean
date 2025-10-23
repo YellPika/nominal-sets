@@ -85,7 +85,7 @@ noncomputable def extend
     <| by ext a
           simp only [
             Ren.fresh_injOn, supp_rename, Finset.mem_inter,
-            Finset.mem_rename, rename_def]
+            Finset.mem_rename, RenameAction.rename_def]
           grind
 
 lemma extend_def
@@ -129,7 +129,9 @@ lemma extend_def
   have lemma₄
       : ∀a ∈ A ∪ supp 𝔸 (rename (.fresh (supp 𝔸 x) A) x),
         Ren.unfresh (supp 𝔸 x) A a = σ' (τ' a) := by
-    simp only [Ren.fresh_injOn, supp_rename, Finset.mem_union, Finset.mem_rename, rename_def]
+    simp only [
+      Ren.fresh_injOn, supp_rename, Finset.mem_union,
+      Finset.mem_rename, RenameAction.rename_def]
     grind
 
   simp only [lemma₁]
@@ -182,7 +184,7 @@ lemma isSupportOfF_extend
     grind [= Ren.mul_coe, = Ren.mk_coe]
 
   have lemma₂ : ∀a ∈ A ∪ supp 𝔸 (rename μ x), (σ * μ') a = (τ' * σ') a := by
-    grind [= Ren.mul_coe, = rename_def]
+    grind [= Ren.mul_coe, = RenameAction.rename_def]
 
   nth_rw 2 [extend_def τ τ'
     (by grind [→ supp_rename_subset'])
@@ -276,7 +278,7 @@ def rename
       | inr this =>
         have h₁ : σ' a ∈ supp 𝔸 (RenamingSets.rename σ' x) := by
           rw [lemma₁, supp_rename]
-          · simp only [Finset.mem_rename, rename_def]
+          · simp only [Finset.mem_rename, RenameAction.rename_def]
             use a
           · intro b hb c hc hbc
             rcases supp_rename_subset' _ _ _ hb with ⟨b, hb', rfl⟩

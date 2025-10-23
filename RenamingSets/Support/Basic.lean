@@ -60,6 +60,10 @@ lemma isSupportOf_union_right
   apply isSupportOf_mono
   simp only [Finset.le_eq_subset, Finset.subset_union_right]
 
+@[simp]
+lemma isSupportOf_discrete [DiscreteRenameAction 𝔸 X] (A : Finset 𝔸) (x : X) : IsSupportOf A x := by
+  simp only [isSupportOf_def, rename_discrete', id_eq, implies_true]
+
 /-! ## `IsSupportOfF` -/
 
 lemma isSupportOfF_def
@@ -124,6 +128,11 @@ lemma isSupported_def (x : X) : IsSupported 𝔸 x ↔ ∃A : Finset 𝔸, IsSup
   apply Iff.intro <;>
   · intro ⟨A, hA⟩
     exact ⟨A, hA⟩
+
+@[simp]
+lemma isSupported_discrete [DiscreteRenameAction 𝔸 X] (x : X) : IsSupported 𝔸 x := by
+  use ∅
+  simp only [isSupportOf_discrete]
 
 /-! ## `IsSupportedF` -/
 
@@ -214,6 +223,13 @@ lemma equivariant_comp'
 @[fun_prop, grind →, grind ←]
 lemma isSupportedF_of_equivariant {f : X → Y} (hf : Equivariant 𝔸 f) : IsSupportedF 𝔸 f := by
   grind [equivariant_def, isSupportedF_def]
+
+/-! ## `RenamingSet` -/
+
+instance : RenamingSet[(default : RenameAction 𝔸 X)] := by
+  let : RenameAction 𝔸 X := default
+  constructor
+  simp only [isSupported_discrete, implies_true]
 
 /-! ## `supp` -/
 
