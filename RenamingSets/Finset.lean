@@ -205,4 +205,25 @@ lemma supp_apply
   simp only [Ren.restrict_coe, Finset.mem_singleton] at ha
   grind
 
+omit [RenamingSet 𝔸 X]
+lemma isSupportOf_rename
+    [DecidableEq 𝔸] (σ : Ren 𝔸) {A : Finset 𝔸} {x : X} (hx : IsSupportOf A x)
+    : IsSupportOf (rename σ A) (rename σ x) := by
+  classical
+  simp only [
+    isSupportOf_def, Finset.mem_rename, RenameAction.rename_def,
+    forall_exists_index, and_imp, forall_apply_eq_imp_iff₂, rename_mul]
+  intro σ₁ σ₂ hσ
+  apply hx.eq hσ
+
+omit [RenamingSet 𝔸 X]
+lemma isSupported_rename
+    [DecidableEq 𝔸] (σ : Ren 𝔸) {x : X} (hx : IsSupported 𝔸 x)
+    : IsSupported 𝔸 (rename σ x) := by
+  classical
+  rcases hx with ⟨A, hA⟩
+  use rename σ A
+  apply isSupportOf_rename
+  exact hA
+
 end RenamingSets

@@ -10,6 +10,7 @@ import RenamingSets.Ren.Fresh
 import RenamingSets.Ren.Transfer
 import RenamingSets.RenameAction.Basic
 import RenamingSets.RenameAction.Defs
+import RenamingSets.Restrict
 import RenamingSets.Sum
 import RenamingSets.Support.Basic
 import RenamingSets.Support.Defs
